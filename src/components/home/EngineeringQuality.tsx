@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   ShieldCheck, 
@@ -9,13 +8,16 @@ import {
   Cpu, 
   Layers, 
   Droplets, 
-  Wind, 
   Sparkles, 
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Gauge,
+  Sliders
 } from 'lucide-react';
 
 export function EngineeringQuality() {
+  const [simulationMode, setSimulationMode] = useState<'ufill' | 'generic'>('ufill');
+
   const qualityPillars = [
     {
       icon: Activity,
@@ -24,6 +26,7 @@ export function EngineeringQuality() {
       description: 'Continuous dual-axis optical micrometers measure the extrusion stream across two perpendicular planes. Every segment exceeding ±0.02 mm tolerance is automatically culled at the winding head.',
       spec: '±0.02 mm',
       specLabel: 'Guaranteed Tolerance',
+      accent: '#10B981',
     },
     {
       icon: Cpu,
@@ -32,6 +35,7 @@ export function EngineeringQuality() {
       description: 'We exclusively process 100% medical/food-contact compliant virgin pellets. No recycled regrind or recycled waste dust ensures zero thermal carbonization inside 0.2mm nozzles.',
       spec: '100%',
       specLabel: 'Virgin Polymer Purity',
+      accent: '#6258F5',
     },
     {
       icon: Layers,
@@ -40,116 +44,230 @@ export function EngineeringQuality() {
       description: 'High-speed automated winding arms lay filament side-by-side with computer-controlled geometric pitch. Zero loop overlaps eliminate catastrophic mid-print spool snags.',
       spec: '0.00%',
       specLabel: 'Spool Snag Rate',
+      accent: '#06B6D4',
     },
     {
       icon: Droplets,
       title: 'Desiccant-Sealed Aluminum Barrier',
-      subtitle: '&lt;0.05% moisture content at unboxing',
+      subtitle: '<0.05% moisture content at unboxing',
       description: 'Directly from the 60°C dry-air annealing chamber, spools are robotically sealed in multi-layer aluminum hermetic foil with high-absorption molecular sieve desiccant.',
-      spec: '&lt;0.05%',
+      spec: '<0.05%',
       specLabel: 'Moisture at Pack',
+      accent: '#F97316',
     },
   ];
 
   return (
-    <section className="py-28 bg-white relative overflow-hidden border-b border-ufill-border">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        {/* Header */}
+    <section 
+      id="engineering-quality"
+      className="py-28 sm:py-36 bg-[#080B16] text-white relative overflow-hidden border-b border-white/10 select-none"
+    >
+      {/* Background Matrix & Subtle Gradient */}
+      <div 
+        className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.6) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px',
+        }}
+      />
+      <div className="absolute top-1/4 right-1/3 w-[600px] h-[600px] bg-[#6258F5]/10 rounded-full blur-[160px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
+        
+        {/* Editorial Section Header */}
         <div className="max-w-3xl mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-ufill-tertiary text-ufill-secondary text-xs font-bold uppercase tracking-wider border border-ufill-secondary/20">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Section 05 • Metrology & Standards</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-emerald-400 text-xs font-bold uppercase tracking-[0.2em] border border-white/15">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Section 03 • Metrology Standards</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-ufill-primary tracking-tightest leading-[1.08]">
-            Built with Metrology-Grade <br />
-            Manufacturing Rigor.
+
+          <h2 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold uppercase leading-[0.92] tracking-tightest text-white">
+            0.00% Clog Rate. <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-[#67E8F9] to-white">
+              ±0.02 mm Metrology Rigor.
+            </span>
           </h2>
-          <p className="text-base sm:text-lg text-ufill-textMuted leading-relaxed">
-            3D printing failures are rarely printer errors — they are caused by inconsistent filament diameter, moisture pockets, and filament tangles. We eliminate all three at the manufacturing source.
+
+          <p className="text-sm sm:text-base lg:text-lg text-white/70 max-w-2xl leading-relaxed">
+            3D printing failures are rarely printer errors — they are caused by inconsistent filament diameter, moisture pockets, and loose winding snags. We eliminate all three at the manufacturing source.
           </p>
         </div>
 
-        {/* Feature Grid with Technical Callouts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Interactive Metrology Comparison HUD */}
+        <div className="mb-16 p-6 sm:p-8 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6 mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                </span>
+                <span className="font-mono text-xs uppercase tracking-wider text-white/80 font-bold">
+                  Dual-Axis Optical Micrometer Simulation
+                </span>
+              </div>
+              <p className="text-xs text-white/60 mt-1">
+                Visualizing extrusion strand variance measured across 1,000 continuous meters
+              </p>
+            </div>
+
+            {/* Toggle Mode */}
+            <div className="flex items-center gap-1.5 p-1 bg-white/10 rounded-xl border border-white/15 text-xs font-bold">
+              <button
+                onClick={() => setSimulationMode('ufill')}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  simulationMode === 'ufill'
+                    ? 'bg-emerald-500 text-black shadow-md'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                UFill3D (±0.018 mm)
+              </button>
+              <button
+                onClick={() => setSimulationMode('generic')}
+                className={`px-4 py-2 rounded-lg transition-all ${
+                  simulationMode === 'generic'
+                    ? 'bg-rose-500 text-white shadow-md'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                Generic Filament (±0.065 mm)
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Tolerance Visualizer Graph */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div className="lg:col-span-8 space-y-3">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-white/60">Upper Limit: 1.770 mm</span>
+                <span className={simulationMode === 'ufill' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  {simulationMode === 'ufill' ? 'Within Precision Spec (PASS)' : 'Exceeds Tolerance Limit (FAIL)'}
+                </span>
+                <span className="text-white/60">Lower Limit: 1.730 mm</span>
+              </div>
+
+              {/* Graphic Waveform */}
+              <div className="relative h-28 w-full rounded-2xl bg-black/60 border border-white/10 p-3 overflow-hidden flex items-center">
+                {/* Upper Tolerance Guide Line */}
+                <div className="absolute top-4 inset-x-0 border-t border-dashed border-white/20" />
+                <span className="absolute top-1 right-3 text-[9px] font-mono text-white/40">+0.02 mm</span>
+
+                {/* Target Baseline */}
+                <div className="absolute top-1/2 inset-x-0 border-t border-emerald-500/40" />
+                <span className="absolute top-[44%] right-3 text-[9px] font-mono text-emerald-400">1.750 mm Nom</span>
+
+                {/* Lower Tolerance Guide Line */}
+                <div className="absolute bottom-4 inset-x-0 border-t border-dashed border-white/20" />
+                <span className="absolute bottom-1 right-3 text-[9px] font-mono text-white/40">-0.02 mm</span>
+
+                {/* Synthetic Waveform Bars */}
+                <div className="relative w-full h-full flex items-center justify-between gap-1 z-10">
+                  {Array.from({ length: 42 }).map((_, idx) => {
+                    const deviation = simulationMode === 'ufill'
+                      ? Math.sin(idx * 0.45) * 8 + (idx % 3 === 0 ? 3 : -3)
+                      : Math.sin(idx * 0.3) * 32 + (idx % 2 === 0 ? 18 : -22);
+                    const isOutOfSpec = Math.abs(deviation) > 20;
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`w-1 rounded-full transition-all duration-500 ${
+                          isOutOfSpec
+                            ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]'
+                            : simulationMode === 'ufill'
+                              ? 'bg-emerald-400/80 shadow-[0_0_6px_rgba(52,211,153,0.6)]'
+                              : 'bg-amber-400/70'
+                        }`}
+                        style={{
+                          height: `${Math.max(6, Math.abs(deviation) * 2.2)}px`,
+                          transform: `translateY(${deviation * 0.6}px)`,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Readout Summary */}
+            <div className="lg:col-span-4 p-5 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+              <div>
+                <span className="text-[10px] uppercase font-mono tracking-wider text-white/60 block">
+                  Measured Standard Deviation
+                </span>
+                <div className="text-3xl font-extrabold font-mono text-white mt-0.5">
+                  {simulationMode === 'ufill' ? 'σ = 0.007 mm' : 'σ = 0.038 mm'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-white/10 text-xs">
+                <div>
+                  <span className="text-white/60 block text-[10px] uppercase font-mono">Nozzle Backpressure</span>
+                  <strong className={simulationMode === 'ufill' ? 'text-emerald-400' : 'text-rose-400'}>
+                    {simulationMode === 'ufill' ? 'Constant (Zero Surge)' : 'Fluctuating (Under-extrusion)'}
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-white/60 block text-[10px] uppercase font-mono">CoreXY Speed Limit</span>
+                  <strong className={simulationMode === 'ufill' ? 'text-white' : 'text-amber-400'}>
+                    {simulationMode === 'ufill' ? '600 mm/s Confirmed' : '< 180 mm/s Unstable'}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* 4 Pillars Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {qualityPillars.map((pillar) => {
             const Icon = pillar.icon;
             return (
               <div
                 key={pillar.title}
-                className="p-8 rounded-3xl bg-ufill-background border border-ufill-border hover:border-ufill-secondary/40 hover:shadow-elevation-2 transition-all flex flex-col justify-between group"
+                className="p-8 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/15 hover:border-white/40 transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1 shadow-xl"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-white border border-ufill-border flex items-center justify-center text-ufill-secondary shadow-sm mb-6 group-hover:bg-ufill-secondary group-hover:text-white transition-colors">
-                    <Icon className="w-6 h-6" />
+                  <div 
+                    className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform"
+                    style={{ borderColor: `${pillar.accent}40` }}
+                  >
+                    <Icon className="w-6 h-6" style={{ color: pillar.accent }} />
                   </div>
 
-                  <span className="text-2xl font-bold font-mono text-ufill-primary block mb-1">
+                  <span className="text-3xl font-extrabold font-mono text-white block mb-1">
                     {pillar.spec}
                   </span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-ufill-secondary block mb-4">
+                  <span 
+                    className="text-[10px] font-bold uppercase tracking-[0.18em] block mb-4"
+                    style={{ color: pillar.accent }}
+                  >
                     {pillar.specLabel}
                   </span>
 
-                  <h3 className="text-lg font-bold text-ufill-primary mb-2">
+                  <h3 className="text-lg font-bold text-white mb-2 leading-snug">
                     {pillar.title}
                   </h3>
-                  <p className="text-xs font-semibold text-ufill-textDim mb-3">
+                  <p className="text-xs font-semibold text-white/60 mb-3">
                     {pillar.subtitle}
                   </p>
-                  <p className="text-xs text-ufill-textMuted leading-relaxed">
+                  <p className="text-xs text-white/70 leading-relaxed">
                     {pillar.description}
                   </p>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-ufill-border/60 flex items-center gap-2 text-xs font-semibold text-ufill-primary">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>QC Verified on Every Batch</span>
+                <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-white/60">
+                  <span>Standard 0{qualityPillars.indexOf(pillar) + 1}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Technical Diagram Banner */}
-        <div className="mt-16 rounded-3xl bg-ufill-primary text-white p-8 sm:p-12 relative overflow-hidden shadow-elevation-3">
-          <div 
-            className="absolute inset-0 opacity-10 pointer-events-none"
-            style={{
-              backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
-              backgroundSize: '40px 40px',
-            }}
-          />
-
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-8 space-y-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-ufill-tertiary">
-                Direct Lab Testing & Quality Control
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                Scan the QR on your spool to view exact laser telemetry.
-              </h3>
-              <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-                Every UFill3D spool includes an individual batch QR code. Scan with your phone to view the real-time diameter graph recorded as your exact 330-meter spool passed through our laser micrometers.
-              </p>
-            </div>
-
-            <div className="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-4">
-              <Link
-                href="/about"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-ufill-secondary text-white font-semibold text-sm hover:bg-ufill-secondaryHover transition-all shadow-glow-purple"
-              >
-                <span>Read Factory Metrology Report</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm border border-white/20 transition-all"
-              >
-                Download RoHS & REACH Certificates
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
