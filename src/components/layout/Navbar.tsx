@@ -21,6 +21,7 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [materialsDropdownOpen, setMaterialsDropdownOpen] = useState(false);
+  const isDarkHomeHero = pathname === '/' && !isScrolled;
   
   const totalItems = useCartStore((state) => state.getTotalItems());
   const toggleDrawer = useCartStore((state) => state.toggleDrawer);
@@ -83,7 +84,9 @@ export function Navbar() {
                       className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium transition-colors rounded-lg ${
                         pathname.startsWith(link.href)
                           ? 'text-ufill-secondary font-semibold'
-                          : 'text-ufill-primary hover:text-ufill-secondary hover:bg-ufill-tertiary/40'
+                          : isDarkHomeHero
+                            ? 'text-white/85 hover:text-white hover:bg-white/10'
+                            : 'text-ufill-primary hover:text-ufill-secondary hover:bg-ufill-tertiary/40'
                       }`}
                     >
                       <span>{link.label}</span>
@@ -139,7 +142,9 @@ export function Navbar() {
                   className={`px-3.5 py-2 text-sm font-medium transition-colors rounded-lg ${
                     isActive
                       ? 'text-ufill-secondary font-semibold bg-ufill-tertiary/50'
-                      : 'text-ufill-primary hover:text-ufill-secondary hover:bg-ufill-tertiary/30'
+                      : isDarkHomeHero
+                        ? 'text-white/85 hover:text-white hover:bg-white/10'
+                        : 'text-ufill-primary hover:text-ufill-secondary hover:bg-ufill-tertiary/30'
                   }`}
                 >
                   {link.label}
@@ -167,7 +172,7 @@ export function Navbar() {
             <button
               onClick={toggleDrawer}
               aria-label="View Shopping Cart"
-              className="relative p-2.5 rounded-xl text-ufill-primary hover:text-ufill-secondary hover:bg-ufill-tertiary/50 transition-all duration-200 active:scale-95"
+              className={`relative p-2.5 rounded-xl transition-all duration-200 active:scale-95 ${isDarkHomeHero ? 'text-white hover:bg-white/10' : 'text-ufill-primary hover:text-ufill-secondary hover:bg-ufill-tertiary/50'}`}
             >
               <ShoppingBag className="w-5 h-5" />
               {totalItems > 0 && (
@@ -181,7 +186,7 @@ export function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Navigation Menu"
-              className="lg:hidden p-2 rounded-xl text-ufill-primary hover:bg-ufill-tertiary/50"
+              className={`lg:hidden p-2 rounded-xl ${isDarkHomeHero ? 'text-white hover:bg-white/10' : 'text-ufill-primary hover:bg-ufill-tertiary/50'}`}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>

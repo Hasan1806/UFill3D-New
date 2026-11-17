@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { FilamentSpoolCanvas } from '@/components/3d/FilamentSpoolCanvas';
 import { useCartStore } from '@/lib/cart-store';
 import { formatPrice } from '@/lib/currency';
+
+const FilamentSpoolCanvas = dynamic(
+  () => import('@/components/3d/FilamentSpoolCanvas').then((module) => module.FilamentSpoolCanvas),
+  { ssr: false, loading: () => <div className="h-full w-full animate-pulse rounded-3xl bg-ufill-tertiary/40" /> }
+);
 import { PRODUCTS } from '@/data/products';
 import { 
   Palette, 

@@ -3,7 +3,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
 
-// Safe WebGL prototype guards to guarantee getShaderInfoLog never returns null to .trim()
+// Safe WebGL prototype guards to guarantee getShaderInfoLog / getProgramInfoLog never return null to .trim()
 if (typeof window !== 'undefined') {
   const safePatch = (proto: any, fnName: string) => {
     if (!proto || !proto[fnName]) return;
@@ -46,8 +46,30 @@ interface SpoolCanvasProps {
   scrollDriven?: boolean;
 }
 
+// Exactly matching the requested 3D checkpoints (in radians)
+const ORIENTATION_KEYFRAMES = [
+  { progress: 0.00, rotX: 0.00,  rotY: 0.00, rotZ: 0.00, posX: 1.48, posY: 0.00,  posZ: 0.00, scale: 1.06 },
+  { progress: 0.20, rotX: -0.25, rotY: 0.45, rotZ: 0.80, posX: 0.90, posY: -0.08, posZ: 0.35, scale: 1.18 },
+  { progress: 0.40, rotX: 0.35,  rotY: 1.10, rotZ: 1.60, posX: 0.15, posY: 0.10,  posZ: 0.80, scale: 1.28 },
+  { progress: 0.60, rotX: -0.30, rotY: 2.00, rotZ: 2.50, posX: -0.55, posY: -0.05, posZ: 1.25, scale: 1.42 },
+  { progress: 0.80, rotX: 0.20,  rotY: 2.80, rotZ: 3.50, posX: 0.00, posY: 0.05,  posZ: 1.90, scale: 1.75 },
+  { progress: 1.00, rotX: 0.00,  rotY: 3.50, rotZ: 4.50, posX: 0.00, posY: 0.00,  posZ: 3.40, scale: 2.70 },
+];
+
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+// Premium Effect Three: Cinematic Motion Holds
+// Smoothly retimes progress to linger on the most stunning 3D perspective compositions
+// (specifically the 38%-55% side thickness view and unspooling angle)
+// while preserving continuous, monotonically increasing, reversible movement with zero dead zones.
+function computePacedProgress(rawP: number): number {
+  const p = clamp(rawP, 0, 1);
+  const hold1 = Math.sin(p * Math.PI * 2.0) * 0.022;
+  const midDist = Math.max(0, Math.min(1, (p - 0.22) / 0.44));
+  const hold2 = Math.sin(midDist * Math.PI) * -0.052;
+  return clamp(p + hold1 + hold2, 0, 1);
+}
 
 export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProps>(
   function FilamentSpoolCanvas(
@@ -70,11 +92,14 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
     const containerRef = useRef<HTMLDivElement>(null);
     const fallbackRef = useRef<HTMLDivElement>(null);
     const materialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+    const strandMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+    const spoolGroupRef = useRef<THREE.Group | null>(null);
+    const keyLightRef = useRef<THREE.DirectionalLight | null>(null);
+    const rimLightRef = useRef<THREE.DirectionalLight | null>(null);
+    const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const progressRef = useRef(0);
     const visibleRef = useRef(true);
     const frameRef = useRef<number | null>(null);
-    const strandRef = useRef<THREE.Mesh | null>(null);
-    const strandCountRef = useRef(0);
     const pointerRef = useRef({ dragging: false, previousX: 0, tilt: 0, spin: 0 });
     const propsRef = useRef({ rotationX, rotationY, rotationZ, positionX, positionY, scale, autoRotateSpeed });
     const renderRef = useRef<() => void>(() => undefined);
@@ -97,16 +122,22 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
     useEffect(() => {
       const material = materialRef.current;
+      const strandMat = strandMaterialRef.current;
       if (!material) return;
       material.color.set(color);
+      if (strandMat) strandMat.color.set(color);
+
       const finishes = {
         Matte: { roughness: 0.72, metalness: 0.02 },
-        Silk: { roughness: 0.3, metalness: 0.08 },
-        Gloss: { roughness: 0.16, metalness: 0.04 },
+        Silk: { roughness: 0.28, metalness: 0.12 },
+        Gloss: { roughness: 0.14, metalness: 0.04 },
         Translucent: { roughness: 0.38, metalness: 0.01 },
       } as const;
-      Object.assign(material, finishes[finish] || finishes.Silk);
+      const config = finishes[finish] || finishes.Silk;
+      Object.assign(material, config);
+      if (strandMat) Object.assign(strandMat, config);
       material.needsUpdate = true;
+      if (strandMat) strandMat.needsUpdate = true;
       renderRef.current();
     }, [color, finish]);
 
@@ -115,8 +146,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       if (!container) return;
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
-      camera.position.set(0, 0.05, 8.3);
+      const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
+      camera.position.set(0, 0, 7.8);
+      cameraRef.current = camera;
 
       let renderer: THREE.WebGLRenderer;
       try {
@@ -126,40 +158,75 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           powerPreference: 'high-performance',
         });
       } catch (err) {
-        console.warn('WebGL initialization failed, using CSS fallback:', err);
+        console.warn('WebGL initialization failed, falling back:', err);
         if (fallbackRef.current) fallbackRef.current.style.display = 'flex';
         return;
       }
 
       renderer.setClearColor(0x000000, 0);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.25 : 1.6));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.08;
+      renderer.toneMappingExposure = 1.12;
 
+      container.innerHTML = '';
       container.appendChild(renderer.domElement);
       if (fallbackRef.current) fallbackRef.current.style.display = 'none';
 
-      // Studio Lighting
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xd8dcf5, 2.2));
-      const keyLight = new THREE.DirectionalLight(0xffffff, 3.8);
-      keyLight.position.set(4.5, 5.5, 6);
+      // Studio 3-Point Lighting with Electric Periwinkle Rim Highlight
+      scene.add(new THREE.HemisphereLight(0xffffff, 0xd4d8f0, 2.0));
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 3.6);
+      keyLight.position.set(5, 6, 6);
       scene.add(keyLight);
+      keyLightRef.current = keyLight;
 
       const fillLight = new THREE.DirectionalLight(0xbab5ff, 1.8);
-      fillLight.position.set(-5, -1.5, 4);
+      fillLight.position.set(-6, -1, 4);
       scene.add(fillLight);
 
-      const rimLight = new THREE.DirectionalLight(0x6258f5, 3.0);
-      rimLight.position.set(-1, 4, -5);
+      const rimLight = new THREE.DirectionalLight(0x6258f5, 3.8);
+      rimLight.position.set(0, 4.5, -5);
       scene.add(rimLight);
+      rimLightRef.current = rimLight;
 
-      const orientation = new THREE.Group();
-      const rotor = new THREE.Group();
-      orientation.add(rotor);
-      scene.add(orientation);
+      // Parent Three.js Group holding the entire physical spool
+      const spoolGroup = new THREE.Group();
+      spoolGroupRef.current = spoolGroup;
+      scene.add(spoolGroup);
 
-      // Procedural micro-groove bump texture for realistic wound strand sheen
+      // Dimensions
+      const outerRadius = 2.15;
+      const spoolWidth = 1.30;
+      const hubRadius = 0.92;
+      const arborRadius = 0.38;
+
+      // High-grade technical smoked polycarbonate material for flanges
+      const flangeMaterial = new THREE.MeshPhysicalMaterial({
+        color: 0x161a35,
+        roughness: 0.22,
+        metalness: 0.14,
+        transmission: 0.28,
+        thickness: 0.65,
+        transparent: true,
+        opacity: 0.92,
+        clearcoat: 0.85,
+        clearcoatRoughness: 0.12,
+      });
+
+      const edgeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0c0f24,
+        roughness: 0.38,
+        metalness: 0.18,
+      });
+
+      const hubMaterial = new THREE.MeshStandardMaterial({
+        color: 0x060812,
+        roughness: 0.65,
+        metalness: 0.1,
+      });
+
+      // Procedural micro-groove bump texture for realistic filament winding ridges
       let bumpTexture: THREE.CanvasTexture | null = null;
       try {
         const canvasTex = document.createElement('canvas');
@@ -170,128 +237,212 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           ctx.fillStyle = '#808080';
           ctx.fillRect(0, 0, 128, 512);
           for (let y = 0; y < 512; y += 4) {
-            ctx.fillStyle = y % 8 === 0 ? '#404040' : '#c0c0c0';
+            ctx.fillStyle = y % 8 === 0 ? '#383838' : '#c8c8c8';
             ctx.fillRect(0, y, 128, 2);
           }
           bumpTexture = new THREE.CanvasTexture(canvasTex);
           bumpTexture.wrapS = THREE.RepeatWrapping;
           bumpTexture.wrapT = THREE.RepeatWrapping;
-          bumpTexture.repeat.set(1, 32);
+          bumpTexture.repeat.set(1, 38);
         }
       } catch {
         bumpTexture = null;
       }
 
-      // Materials
+      // Filament Material
       const filamentMaterial = new THREE.MeshStandardMaterial({
         color: new THREE.Color(color),
-        roughness: finish === 'Matte' ? 0.72 : finish === 'Gloss' ? 0.16 : 0.3,
-        metalness: finish === 'Silk' ? 0.08 : 0.02,
+        roughness: finish === 'Matte' ? 0.72 : finish === 'Gloss' ? 0.14 : 0.28,
+        metalness: finish === 'Silk' ? 0.12 : 0.02,
         bumpMap: bumpTexture,
-        bumpScale: 0.025,
+        bumpScale: 0.032,
       });
       materialRef.current = filamentMaterial;
 
-      const flangeMaterial = new THREE.MeshStandardMaterial({
-        color: 0x161a35,
-        roughness: 0.32,
-        metalness: 0.08,
-      });
-
-      const edgeMaterial = new THREE.MeshStandardMaterial({
-        color: 0x090c20,
-        roughness: 0.45,
-        metalness: 0.12,
-      });
-
-      const outerRadius = 2.14;
-      const spoolWidth = 1.24;
-      const flangeGeometry = new THREE.CylinderGeometry(outerRadius, outerRadius, 0.1, 48, 1);
-      const rimGeometry = new THREE.TorusGeometry(outerRadius - 0.03, 0.055, 8, 48);
-
-      // Flanges (Both sides)
+      // 1. Two Circular Side Flanges (Front at +Z, Back at -Z)
       for (const side of [-1, 1]) {
-        const flange = new THREE.Mesh(flangeGeometry, flangeMaterial);
-        flange.rotation.x = Math.PI / 2;
-        flange.position.z = side * spoolWidth * 0.5;
-        rotor.add(flange);
+        const flangeZ = side * (spoolWidth * 0.5 + 0.05);
+        const flangeGroup = new THREE.Group();
+        flangeGroup.position.z = flangeZ;
 
-        const rimMesh = new THREE.Mesh(rimGeometry, edgeMaterial);
-        rimMesh.position.z = side * (spoolWidth * 0.5 + 0.052);
-        rotor.add(rimMesh);
+        // Outer Beveled Rim Ring (gives tangible edge thickness)
+        const outerRimGeo = new THREE.TorusGeometry(outerRadius - 0.03, 0.055, 12, 64);
+        const outerRimMesh = new THREE.Mesh(outerRimGeo, edgeMaterial);
+        flangeGroup.add(outerRimMesh);
+
+        // Circular Disk Body
+        const diskGeo = new THREE.RingGeometry(hubRadius, outerRadius, 64);
+        const diskMesh = new THREE.Mesh(diskGeo, flangeMaterial);
+        flangeGroup.add(diskMesh);
+
+        // Inner Hub Lip
+        const innerRimGeo = new THREE.TorusGeometry(hubRadius, 0.035, 12, 48);
+        const innerRimMesh = new THREE.Mesh(innerRimGeo, edgeMaterial);
+        flangeGroup.add(innerRimMesh);
+
+        // 6 Radial Cutout Windows (Provides real see-through depth to inner layers)
+        for (let i = 0; i < 6; i++) {
+          const angle = (i * Math.PI) / 3;
+          const slotGeo = new THREE.BoxGeometry(0.36, 0.76, 0.08);
+          const slotMat = new THREE.MeshBasicMaterial({ color: 0x050711 });
+          const slot = new THREE.Mesh(slotGeo, slotMat);
+          slot.position.set(
+            Math.cos(angle) * 1.5,
+            Math.sin(angle) * 1.5,
+            0
+          );
+          slot.rotation.z = angle + Math.PI / 2;
+          flangeGroup.add(slot);
+        }
+
+        spoolGroup.add(flangeGroup);
       }
 
-      // Central Hub & Arbor
-      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.86, 0.86, spoolWidth + 0.12, 36), edgeMaterial);
-      hub.rotation.x = Math.PI / 2;
-      rotor.add(hub);
+      // 2. Central Barrel / Core Cylinder (Connects both flanges along Z)
+      const hubGeo = new THREE.CylinderGeometry(hubRadius, hubRadius, spoolWidth, 48);
+      const hubMesh = new THREE.Mesh(hubGeo, hubMaterial);
+      hubMesh.rotation.x = Math.PI / 2;
+      spoolGroup.add(hubMesh);
 
-      const arbor = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.37, 0.37, spoolWidth + 0.24, 24),
-        new THREE.MeshStandardMaterial({ color: 0x03040d, roughness: 0.8 })
-      );
-      arbor.rotation.x = Math.PI / 2;
-      rotor.add(arbor);
+      // 3. Central Arbor Tube (Through-hole axle)
+      const arborGeo = new THREE.CylinderGeometry(arborRadius, arborRadius, spoolWidth + 0.32, 32);
+      const arborMesh = new THREE.Mesh(arborGeo, edgeMaterial);
+      arborMesh.rotation.x = Math.PI / 2;
+      spoolGroup.add(arborMesh);
 
-      // Tightly wound filament coil with microgrooves
-      const coilBody = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.88, 1.88, 1.06, 48),
-        filamentMaterial
-      );
-      coilBody.rotation.x = Math.PI / 2;
-      rotor.add(coilBody);
+      // 4. Tightly Wound Filament Coil (With realistic cylindrical thickness & ridges)
+      const woundRadius = 1.92;
+      const coilWidth = spoolWidth - 0.05;
+      const coilGeo = new THREE.CylinderGeometry(woundRadius, woundRadius, coilWidth, 64);
+      const coilMesh = new THREE.Mesh(coilGeo, filamentMaterial);
+      coilMesh.rotation.x = Math.PI / 2;
+      spoolGroup.add(coilMesh);
 
-      // Loose Filament Leading Strand
-      const looseCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(1.55, 1.05, 0.49),
-        new THREE.Vector3(1.92, 0.58, 0.53),
-        new THREE.Vector3(2.28, -0.08, 0.62),
-        new THREE.Vector3(2.55, -0.88, 0.78),
-        new THREE.Vector3(2.82, -1.58, 1.02),
-      ]);
-      const looseGeometry = new THREE.TubeGeometry(looseCurve, 48, 0.033, 7, false);
-      const looseStrandMaterial = filamentMaterial.clone();
-      looseStrandMaterial.bumpMap = null; // smooth strand without spool groove repetition
-      const looseStrand = new THREE.Mesh(looseGeometry, looseStrandMaterial);
-      strandRef.current = looseStrand;
-      strandCountRef.current = looseGeometry.index ? looseGeometry.index.count : 48 * 7 * 6;
-      rotor.add(looseStrand);
+      // Stepped Winding Ridges (Visible round strand layers)
+      for (const stepZ of [-coilWidth * 0.44, -coilWidth * 0.16, coilWidth * 0.16, coilWidth * 0.44]) {
+        const stepGeo = new THREE.TorusGeometry(woundRadius - 0.015, 0.028, 8, 48);
+        const stepMesh = new THREE.Mesh(stepGeo, filamentMaterial);
+        stepMesh.position.z = stepZ;
+        spoolGroup.add(stepMesh);
+      }
+
+      // 5. Leading Uncoiling Strand
+      const curvePoints = [
+        new THREE.Vector3(woundRadius * 0.95, -0.4, spoolWidth * 0.5 - 0.1),
+        new THREE.Vector3(woundRadius + 0.35, -0.85, spoolWidth * 0.5 + 0.25),
+        new THREE.Vector3(woundRadius + 1.1, -1.35, spoolWidth * 0.5 + 0.65),
+        new THREE.Vector3(woundRadius + 1.8, -1.85, spoolWidth * 0.5 + 1.05),
+      ];
+      const strandCurve = new THREE.CatmullRomCurve3(curvePoints);
+      const strandGeo = new THREE.TubeGeometry(strandCurve, 48, 0.036, 8, false);
+      const strandMaterial = filamentMaterial.clone();
+      strandMaterial.bumpMap = null;
+      strandMaterialRef.current = strandMaterial;
+      const strandMesh = new THREE.Mesh(strandGeo, strandMaterial);
+      spoolGroup.add(strandMesh);
 
       // Floor Shadow
       const shadow = new THREE.Mesh(
-        new THREE.CircleGeometry(1.75, 32),
+        new THREE.CircleGeometry(1.85, 32),
         new THREE.MeshBasicMaterial({ color: 0x11152e, transparent: true, opacity: 0.12, depthWrite: false })
       );
-      shadow.scale.set(1.25, 0.24, 1);
-      shadow.position.set(0.1, -2.22, -1.1);
+      shadow.scale.set(1.3, 0.26, 1);
+      shadow.position.set(0.1, -2.3, -1.2);
       scene.add(shadow);
 
+      // True 3D Multi-Axis Transformation Interpolator with Premium Cinematic Effects
       const applyTransforms = () => {
+        if (!spoolGroupRef.current) return;
         const p = propsRef.current;
-        const progress = progressRef.current;
+        const rawProgress = progressRef.current;
+
         if (scrollDriven) {
-          const arc = Math.sin(progress * Math.PI);
-          orientation.rotation.set(
-            lerp(0.2, 0.13, progress),
-            lerp(-0.52, -0.34, progress),
-            lerp(0.025, -0.015, progress)
-          );
-          orientation.position.set(
-            lerp(0.22, -0.08, progress),
-            lerp(-0.02, 0.1, progress) + arc * 0.04,
-            0
-          );
-          const responsiveScale = window.innerWidth < 768 ? 0.88 : 1.08;
-          orientation.scale.setScalar(responsiveScale * lerp(0.98, 1.08, arc));
-          rotor.rotation.z = -progress * Math.PI * 4.5;
-          if (strandRef.current && strandCountRef.current > 0) {
-            strandRef.current.geometry.setDrawRange(0, Math.floor(strandCountRef.current * lerp(0.42, 1, progress)));
+          const isMobile = window.innerWidth < 1024;
+          // Effect 3: Cinematic Motion Holds re-timing
+          const paced = computePacedProgress(rawProgress);
+
+          // Find current keyframe segment based on paced progress
+          let segIndex = 0;
+          for (let i = 0; i < ORIENTATION_KEYFRAMES.length - 1; i++) {
+            if (paced >= ORIENTATION_KEYFRAMES[i].progress && paced <= ORIENTATION_KEYFRAMES[i + 1].progress) {
+              segIndex = i;
+              break;
+            }
+          }
+          if (paced >= 1) segIndex = ORIENTATION_KEYFRAMES.length - 2;
+
+          const k1 = ORIENTATION_KEYFRAMES[segIndex];
+          const k2 = ORIENTATION_KEYFRAMES[segIndex + 1];
+          const segRange = k2.progress - k1.progress;
+          const rawT = segRange > 0 ? (paced - k1.progress) / segRange : 0;
+          // Smooth sinusoidal ease between checkpoints
+          const t = 0.5 - 0.5 * Math.cos(rawT * Math.PI);
+
+          const rotX = lerp(k1.rotX, k2.rotX, t);
+          const rotY = lerp(k1.rotY, k2.rotY, t);
+          const rotZ = lerp(k1.rotZ, k2.rotZ, t);
+
+          let posX = lerp(k1.posX, k2.posX, t);
+          let posY = lerp(k1.posY, k2.posY, t);
+          let posZ = lerp(k1.posZ, k2.posZ, t);
+          let sc = lerp(k1.scale, k2.scale, t);
+
+          // Effect 1: Cinematic Depth Parallax & Floating Motion
+          // Subtle breathing/floating motion directly linked to scroll progress
+          const floatSway = Math.sin(paced * Math.PI * 3.6) * 0.032;
+          posY += floatSway;
+
+          if (isMobile) {
+            // Mobile adjustments: centered horizontally, scaled down for smaller viewports
+            posX = 0;
+            posY = lerp(0.65, -0.1, paced) + floatSway;
+            posZ = lerp(0, 1.8, paced);
+            sc = sc * 0.72;
+          }
+
+          spoolGroupRef.current.rotation.set(rotX, rotY, rotZ);
+          spoolGroupRef.current.position.set(posX, posY, posZ);
+          spoolGroupRef.current.scale.setScalar(sc);
+
+          // Effect 1 (Continued): Gentle Camera Dolly & Perspective Shift
+          if (cameraRef.current) {
+            const baseZ = isMobile ? 8.6 : 7.8;
+            const dollyZ = Math.sin(paced * Math.PI) * 0.38; // Pulls subtly closer during dramatic side profile
+            const lateralParallaxX = Math.sin(paced * Math.PI * 1.5) * 0.18;
+            const lateralParallaxY = Math.cos(paced * Math.PI * 1.2) * 0.10;
+
+            cameraRef.current.position.set(lateralParallaxX, lateralParallaxY, baseZ - dollyZ);
+            cameraRef.current.lookAt(posX * 0.28, posY * 0.28, 0);
+          }
+
+          // Effect 2: Dynamic Light Sweep across the winding ridges and translucent flange lips
+          if (keyLightRef.current) {
+            const sweepAngle = paced * Math.PI * 1.6;
+            keyLightRef.current.position.set(
+              4.5 + Math.cos(sweepAngle) * 2.2,
+              5.5 + Math.sin(sweepAngle * 0.8) * 1.4,
+              5.5 + Math.sin(sweepAngle) * 2.5
+            );
+            keyLightRef.current.intensity = 3.6 + Math.sin(paced * Math.PI) * 0.8;
+          }
+
+          if (rimLightRef.current) {
+            rimLightRef.current.position.set(
+              Math.sin(paced * Math.PI * 2.2) * 3.2,
+              4.5 + Math.cos(paced * Math.PI * 1.5) * 1.2,
+              -4.8 + Math.cos(paced * Math.PI) * 1.5
+            );
+            rimLightRef.current.intensity = 3.8 + Math.sin(paced * Math.PI * 1.2) * 1.0;
           }
         } else {
-          orientation.rotation.set(p.rotationX + pointerRef.current.tilt, p.rotationY, p.rotationZ);
-          orientation.position.set(p.positionX, p.positionY, 0);
-          orientation.scale.setScalar(p.scale);
-          rotor.rotation.z = pointerRef.current.spin;
+          // Interactive / prop controlled mode (e.g. Color Studio)
+          spoolGroupRef.current.rotation.set(
+            p.rotationX + pointerRef.current.tilt,
+            p.rotationY,
+            p.rotationZ
+          );
+          spoolGroupRef.current.position.set(p.positionX, p.positionY, 0);
+          spoolGroupRef.current.scale.setScalar(p.scale);
         }
       };
 
@@ -301,7 +452,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           applyTransforms();
           renderer.render(scene, camera);
         } catch (err) {
-          console.warn('Three.js render caught error:', err);
+          console.warn('Three.js render error caught:', err);
           if (fallbackRef.current) fallbackRef.current.style.display = 'flex';
         }
       };
@@ -311,7 +462,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         const height = Math.max(1, container.clientHeight);
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
-        camera.position.z = width < 640 ? 9.4 : 8.3;
+        camera.position.z = width < 640 ? 8.6 : 7.8;
         camera.updateProjectionMatrix();
         renderRef.current();
       };
@@ -336,8 +487,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       };
       const pointerMove = (event: PointerEvent) => {
         if (!interactive || !pointerRef.current.dragging) return;
-        pointerRef.current.spin += (event.clientX - pointerRef.current.previousX) * 0.009;
-        pointerRef.current.tilt = clamp((event.clientY / Math.max(1, container.clientHeight) - 0.5) * 0.25, -0.16, 0.16);
+        const deltaX = event.clientX - pointerRef.current.previousX;
+        pointerRef.current.spin += deltaX * 0.009;
+        pointerRef.current.tilt = clamp((event.clientY / Math.max(1, container.clientHeight) - 0.5) * 0.3, -0.2, 0.2);
         pointerRef.current.previousX = event.clientX;
         renderRef.current();
       };
@@ -346,29 +498,34 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         if (container.hasPointerCapture(event.pointerId)) container.releasePointerCapture(event.pointerId);
       };
 
-      container.addEventListener('pointerdown', pointerDown);
-      container.addEventListener('pointermove', pointerMove);
-      container.addEventListener('pointerup', pointerUp);
-      container.addEventListener('pointercancel', pointerUp);
+      if (interactive) {
+        container.addEventListener('pointerdown', pointerDown);
+        container.addEventListener('pointermove', pointerMove);
+        container.addEventListener('pointerup', pointerUp);
+        container.addEventListener('pointercancel', pointerUp);
 
-      const animate = () => {
-        if (interactive && visibleRef.current && !pointerRef.current.dragging) {
-          pointerRef.current.spin += propsRef.current.autoRotateSpeed;
-          renderRef.current();
-        }
+        const animate = () => {
+          if (interactive && visibleRef.current && !pointerRef.current.dragging) {
+            pointerRef.current.spin += propsRef.current.autoRotateSpeed;
+            renderRef.current();
+          }
+          frameRef.current = requestAnimationFrame(animate);
+        };
         frameRef.current = requestAnimationFrame(animate);
-      };
-      if (interactive) frameRef.current = requestAnimationFrame(animate);
+      }
+
       resize();
 
       return () => {
         if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
         resizeObserver.disconnect();
         intersectionObserver.disconnect();
-        container.removeEventListener('pointerdown', pointerDown);
-        container.removeEventListener('pointermove', pointerMove);
-        container.removeEventListener('pointerup', pointerUp);
-        container.removeEventListener('pointercancel', pointerUp);
+        if (interactive) {
+          container.removeEventListener('pointerdown', pointerDown);
+          container.removeEventListener('pointermove', pointerMove);
+          container.removeEventListener('pointerup', pointerUp);
+          container.removeEventListener('pointercancel', pointerUp);
+        }
         scene.traverse((object) => {
           if (!(object instanceof THREE.Mesh)) return;
           object.geometry.dispose();
@@ -383,7 +540,11 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         renderer.forceContextLoss();
         renderer.domElement.remove();
         materialRef.current = null;
-        strandRef.current = null;
+        strandMaterialRef.current = null;
+        spoolGroupRef.current = null;
+        keyLightRef.current = null;
+        rimLightRef.current = null;
+        cameraRef.current = null;
       };
     }, [interactive, scrollDriven]);
 
@@ -391,7 +552,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       <div
         ref={containerRef}
         aria-hidden="true"
-        className={`relative select-none ${interactive ? 'cursor-grab active:cursor-grabbing' : 'pointer-events-none'} ${className}`}
+        className={`relative select-none ${interactive ? 'cursor-grab active:cursor-grabbing pointer-events-auto' : 'pointer-events-none'} ${className}`}
         style={{ touchAction: interactive ? 'pan-y' : 'auto' }}
       >
         <div ref={fallbackRef} className="absolute inset-0 flex items-center justify-center">
