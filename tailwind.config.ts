@@ -33,7 +33,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "var(--font-inter)",
+          "var(--font-plus-jakarta-sans)",
+          "Plus Jakarta Sans",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
@@ -41,7 +42,8 @@ const config: Config = {
           "sans-serif",
         ],
         display: [
-          "var(--font-display)",
+          "var(--font-plus-jakarta-sans)",
+          "Plus Jakarta Sans",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",

@@ -1,8 +1,16 @@
 import type { Metadata } from 'next';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { CartDrawer } from '@/components/layout/CartDrawer';
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'UFill3D — Make it Real | Premium 3D Printing Filament',
@@ -33,8 +41,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased min-h-screen flex flex-col bg-ufill-background text-ufill-primary selection:bg-ufill-secondary selection:text-white">
+    <html lang="en" className={plusJakartaSans.variable}>
+      <body className={`${plusJakartaSans.className} font-sans antialiased min-h-screen flex flex-col bg-ufill-background text-ufill-primary selection:bg-ufill-secondary selection:text-white`}>
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
