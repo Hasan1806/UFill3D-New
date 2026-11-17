@@ -46,28 +46,43 @@ interface SpoolCanvasProps {
   scrollDriven?: boolean;
 }
 
-// Exactly matching the requested 3D checkpoints (in radians)
-const ORIENTATION_KEYFRAMES = [
-  { progress: 0.00, rotX: 0.00,  rotY: 0.00, rotZ: 0.00, posX: 1.48, posY: 0.00,  posZ: 0.00, scale: 1.06 },
-  { progress: 0.20, rotX: -0.25, rotY: 0.45, rotZ: 0.80, posX: 0.90, posY: -0.08, posZ: 0.35, scale: 1.18 },
-  { progress: 0.40, rotX: 0.35,  rotY: 1.10, rotZ: 1.60, posX: 0.15, posY: 0.10,  posZ: 0.80, scale: 1.28 },
-  { progress: 0.60, rotX: -0.30, rotY: 2.00, rotZ: 2.50, posX: -0.55, posY: -0.05, posZ: 1.25, scale: 1.42 },
-  { progress: 0.80, rotX: 0.20,  rotY: 2.80, rotZ: 3.50, posX: 0.00, posY: 0.05,  posZ: 1.90, scale: 1.75 },
-  { progress: 1.00, rotX: 0.00,  rotY: 3.50, rotZ: 4.50, posX: 0.00, posY: 0.00,  posZ: 3.40, scale: 2.70 },
+// Ultra-Premium Cinematic 3D Timeline Keyframes (0% to 100% continuous progression)
+// Preserves the exact verified rotational baseline while adding 6-DOF camera orbit, dolly-zoom, and spatial momentum
+const CINEMATIC_TIMELINE_KEYFRAMES = [
+  // 0% - 12%: Opening composition (facing user, subtle depth float)
+  { progress: 0.00, rotX: 0.00,  rotY: 0.00, rotZ: 0.00, posX: 1.48, posY: 0.00,  posZ: 0.00, scale: 1.05, fov: 38.0, orbitAngle: 0.00, dollyZ: 0.00 },
+  { progress: 0.12, rotX: -0.12, rotY: 0.20, rotZ: 0.35, posX: 1.30, posY: -0.04, posZ: 0.15, scale: 1.10, fov: 38.0, orbitAngle: 0.06, dollyZ: 0.08 },
+  
+  // 12% - 27%: First 3D rotation & gentle camera orbit revealing flange depth
+  { progress: 0.27, rotX: -0.25, rotY: 0.55, rotZ: 0.95, posX: 0.85, posY: -0.08, posZ: 0.42, scale: 1.18, fov: 37.8, orbitAngle: 0.18, dollyZ: 0.22 },
+
+  // 27% - 43%: Three-quarter product reveal (63° side angle, wound core & cutout windows)
+  { progress: 0.43, rotX: 0.35,  rotY: 1.10, rotZ: 1.65, posX: 0.15, posY: 0.10,  posZ: 0.85, scale: 1.28, fov: 37.5, orbitAngle: 0.32, dollyZ: 0.38 },
+
+  // 43% - 58%: Continuous spatial sweep across viewport, edge-on width & rear flange reveal
+  { progress: 0.58, rotX: -0.30, rotY: 2.05, rotZ: 2.55, posX: -0.55, posY: -0.05, posZ: 1.30, scale: 1.42, fov: 37.2, orbitAngle: 0.24, dollyZ: 0.45 },
+
+  // 58% - 73%: Camera approach & re-centering with rotational momentum
+  { progress: 0.73, rotX: 0.18,  rotY: 2.75, rotZ: 3.45, posX: -0.05, posY: 0.04,  posZ: 1.85, scale: 1.70, fov: 36.8, orbitAngle: 0.10, dollyZ: 0.65 },
+
+  // 73% - 88%: Cinematic dolly zoom into spool geometry (camera moves in, FOV tightens)
+  { progress: 0.88, rotX: 0.05,  rotY: 3.20, rotZ: 4.10, posX: 0.00, posY: 0.00,  posZ: 2.80, scale: 2.25, fov: 35.5, orbitAngle: 0.02, dollyZ: 1.15 },
+
+  // 88% - 100%: Seamless transition hand-off into technical content
+  { progress: 1.00, rotX: 0.00,  rotY: 3.50, rotZ: 4.50, posX: 0.00, posY: 0.00,  posZ: 3.60, scale: 2.80, fov: 34.5, orbitAngle: 0.00, dollyZ: 1.45 },
 ];
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-// Premium Effect Three: Cinematic Motion Holds
-// Smoothly retimes progress to linger on the most stunning 3D perspective compositions
-// (specifically the 38%-55% side thickness view and unspooling angle)
+// Premium Effect 04 & 08: Micro-Rotation Momentum & Seamless Motion Bridging
+// Smoothly retimes progress to linger on the most stunning 3D perspective compositions (38%-55% side thickness view)
 // while preserving continuous, monotonically increasing, reversible movement with zero dead zones.
 function computePacedProgress(rawP: number): number {
   const p = clamp(rawP, 0, 1);
-  const hold1 = Math.sin(p * Math.PI * 2.0) * 0.022;
+  const hold1 = Math.sin(p * Math.PI * 2.0) * 0.020;
   const midDist = Math.max(0, Math.min(1, (p - 0.22) / 0.44));
-  const hold2 = Math.sin(midDist * Math.PI) * -0.052;
+  const hold2 = Math.sin(midDist * Math.PI) * -0.048;
   return clamp(p + hold1 + hold2, 0, 1);
 }
 
@@ -95,7 +110,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
     const strandMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
     const spoolGroupRef = useRef<THREE.Group | null>(null);
     const keyLightRef = useRef<THREE.DirectionalLight | null>(null);
+    const fillLightRef = useRef<THREE.DirectionalLight | null>(null);
     const rimLightRef = useRef<THREE.DirectionalLight | null>(null);
+    const hemiLightRef = useRef<THREE.HemisphereLight | null>(null);
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const progressRef = useRef(0);
     const visibleRef = useRef(true);
@@ -174,7 +191,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       if (fallbackRef.current) fallbackRef.current.style.display = 'none';
 
       // Studio 3-Point Lighting with Electric Periwinkle Rim Highlight
-      scene.add(new THREE.HemisphereLight(0xffffff, 0xd4d8f0, 2.0));
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xd4d8f0, 2.0);
+      scene.add(hemiLight);
+      hemiLightRef.current = hemiLight;
 
       const keyLight = new THREE.DirectionalLight(0xffffff, 3.6);
       keyLight.position.set(5, 6, 6);
@@ -184,6 +203,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       const fillLight = new THREE.DirectionalLight(0xbab5ff, 1.8);
       fillLight.position.set(-6, -1, 4);
       scene.add(fillLight);
+      fillLightRef.current = fillLight;
 
       const rimLight = new THREE.DirectionalLight(0x6258f5, 3.8);
       rimLight.position.set(0, 4.5, -5);
@@ -350,7 +370,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       shadow.position.set(0.1, -2.3, -1.2);
       scene.add(shadow);
 
-      // True 3D Multi-Axis Transformation Interpolator with Premium Cinematic Effects
+      // True 3D Multi-Axis Transformation Interpolator with 8 Premium Cinematic Effects
       const applyTransforms = () => {
         if (!spoolGroupRef.current) return;
         const p = propsRef.current;
@@ -358,24 +378,24 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
         if (scrollDriven) {
           const isMobile = window.innerWidth < 1024;
-          // Effect 3: Cinematic Motion Holds re-timing
+          // Effect 04 & 08: Cinematic Motion Holds & Momentum re-timing
           const paced = computePacedProgress(rawProgress);
 
           // Find current keyframe segment based on paced progress
           let segIndex = 0;
-          for (let i = 0; i < ORIENTATION_KEYFRAMES.length - 1; i++) {
-            if (paced >= ORIENTATION_KEYFRAMES[i].progress && paced <= ORIENTATION_KEYFRAMES[i + 1].progress) {
+          for (let i = 0; i < CINEMATIC_TIMELINE_KEYFRAMES.length - 1; i++) {
+            if (paced >= CINEMATIC_TIMELINE_KEYFRAMES[i].progress && paced <= CINEMATIC_TIMELINE_KEYFRAMES[i + 1].progress) {
               segIndex = i;
               break;
             }
           }
-          if (paced >= 1) segIndex = ORIENTATION_KEYFRAMES.length - 2;
+          if (paced >= 1) segIndex = CINEMATIC_TIMELINE_KEYFRAMES.length - 2;
 
-          const k1 = ORIENTATION_KEYFRAMES[segIndex];
-          const k2 = ORIENTATION_KEYFRAMES[segIndex + 1];
+          const k1 = CINEMATIC_TIMELINE_KEYFRAMES[segIndex];
+          const k2 = CINEMATIC_TIMELINE_KEYFRAMES[segIndex + 1];
           const segRange = k2.progress - k1.progress;
           const rawT = segRange > 0 ? (paced - k1.progress) / segRange : 0;
-          // Smooth sinusoidal ease between checkpoints
+          // Smooth sinusoidal ease between checkpoints (eliminates any angular jerk)
           const t = 0.5 - 0.5 * Math.cos(rawT * Math.PI);
 
           const rotX = lerp(k1.rotX, k2.rotX, t);
@@ -386,17 +406,20 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           let posY = lerp(k1.posY, k2.posY, t);
           let posZ = lerp(k1.posZ, k2.posZ, t);
           let sc = lerp(k1.scale, k2.scale, t);
+          const targetFov = lerp(k1.fov, k2.fov, t);
+          const orbitAngle = lerp(k1.orbitAngle, k2.orbitAngle, t);
+          const dollyZ = lerp(k1.dollyZ, k2.dollyZ, t);
 
-          // Effect 1: Cinematic Depth Parallax & Floating Motion
+          // Effect 03: Magnetic Depth Parallax & Floating Motion
           // Subtle breathing/floating motion directly linked to scroll progress
-          const floatSway = Math.sin(paced * Math.PI * 3.6) * 0.032;
+          const floatSway = Math.sin(paced * Math.PI * 3.6) * 0.028;
           posY += floatSway;
 
           if (isMobile) {
-            // Mobile adjustments: centered horizontally, scaled down for smaller viewports
+            // Mobile adjustments: centered horizontally, scaled for portrait viewports
             posX = 0;
-            posY = lerp(0.65, -0.1, paced) + floatSway;
-            posZ = lerp(0, 1.8, paced);
+            posY = lerp(0.65, -0.08, paced) + floatSway;
+            posZ = lerp(0, 1.6, paced);
             sc = sc * 0.72;
           }
 
@@ -404,35 +427,48 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           spoolGroupRef.current.position.set(posX, posY, posZ);
           spoolGroupRef.current.scale.setScalar(sc);
 
-          // Effect 1 (Continued): Gentle Camera Dolly & Perspective Shift
+          // Effect 01 & 05: Cinematic Camera Orbit & Dolly Zoom
           if (cameraRef.current) {
-            const baseZ = isMobile ? 8.6 : 7.8;
-            const dollyZ = Math.sin(paced * Math.PI) * 0.38; // Pulls subtly closer during dramatic side profile
-            const lateralParallaxX = Math.sin(paced * Math.PI * 1.5) * 0.18;
-            const lateralParallaxY = Math.cos(paced * Math.PI * 1.2) * 0.10;
+            const baseCamZ = isMobile ? 8.6 : 7.8;
+            const camZ = baseCamZ - dollyZ;
+            const lateralParallaxX = Math.sin(paced * Math.PI * 1.5) * 0.16;
+            const lateralParallaxY = Math.cos(paced * Math.PI * 1.2) * 0.08;
+            const camX = Math.sin(orbitAngle) * (isMobile ? 1.0 : 1.8) + lateralParallaxX;
+            const camY = Math.cos(orbitAngle * 1.2) * 0.18 + lateralParallaxY;
 
-            cameraRef.current.position.set(lateralParallaxX, lateralParallaxY, baseZ - dollyZ);
-            cameraRef.current.lookAt(posX * 0.28, posY * 0.28, 0);
+            cameraRef.current.position.set(camX, camY, camZ);
+            cameraRef.current.lookAt(posX * 0.32, posY * 0.32, 0);
+
+            // Dynamic Perspective FOV adjustment for true Hitchcock Dolly-Zoom effect
+            if (cameraRef.current.fov !== targetFov) {
+              cameraRef.current.fov = targetFov;
+              cameraRef.current.updateProjectionMatrix();
+            }
           }
 
-          // Effect 2: Dynamic Light Sweep across the winding ridges and translucent flange lips
+          // Effect 02 & 06: Dynamic Product Lighting & Traveling Rim Highlight
           if (keyLightRef.current) {
             const sweepAngle = paced * Math.PI * 1.6;
             keyLightRef.current.position.set(
-              4.5 + Math.cos(sweepAngle) * 2.2,
-              5.5 + Math.sin(sweepAngle * 0.8) * 1.4,
-              5.5 + Math.sin(sweepAngle) * 2.5
+              4.5 + Math.cos(sweepAngle) * 2.4,
+              5.5 + Math.sin(sweepAngle * 0.8) * 1.5,
+              5.5 + Math.sin(sweepAngle) * 2.6
             );
-            keyLightRef.current.intensity = 3.6 + Math.sin(paced * Math.PI) * 0.8;
+            keyLightRef.current.intensity = 3.6 + Math.sin(paced * Math.PI) * 0.9;
           }
 
           if (rimLightRef.current) {
             rimLightRef.current.position.set(
-              Math.sin(paced * Math.PI * 2.2) * 3.2,
-              4.5 + Math.cos(paced * Math.PI * 1.5) * 1.2,
-              -4.8 + Math.cos(paced * Math.PI) * 1.5
+              Math.sin(paced * Math.PI * 2.2) * 3.4,
+              4.5 + Math.cos(paced * Math.PI * 1.5) * 1.4,
+              -4.8 + Math.cos(paced * Math.PI) * 1.6
             );
-            rimLightRef.current.intensity = 3.8 + Math.sin(paced * Math.PI * 1.2) * 1.0;
+            rimLightRef.current.intensity = 3.8 + Math.sin(paced * Math.PI * 1.2) * 1.2;
+          }
+
+          if (hemiLightRef.current) {
+            // Subtle ambient illumination variation matching three-quarter shadows
+            hemiLightRef.current.intensity = 2.0 + Math.sin(paced * Math.PI) * 0.35;
           }
         } else {
           // Interactive / prop controlled mode (e.g. Color Studio)
@@ -543,7 +579,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         strandMaterialRef.current = null;
         spoolGroupRef.current = null;
         keyLightRef.current = null;
+        fillLightRef.current = null;
         rimLightRef.current = null;
+        hemiLightRef.current = null;
         cameraRef.current = null;
       };
     }, [interactive, scrollDriven]);

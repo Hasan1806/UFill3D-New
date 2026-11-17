@@ -16,6 +16,9 @@ export function Hero() {
   const indicatorRef = useRef<HTMLDivElement>(null);
   const liveGaugeRef = useRef<HTMLSpanElement>(null);
   const spoolRef = useRef<SpoolCanvasHandle>(null);
+  const bgGridRef = useRef<HTMLDivElement>(null);
+  const glowPrimaryRef = useRef<HTMLDivElement>(null);
+  const glowTertiaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -25,6 +28,9 @@ export function Hero() {
     const detail = detailRef.current;
     const indicator = indicatorRef.current;
     const gauge = liveGaugeRef.current;
+    const bgGrid = bgGridRef.current;
+    const glowPrimary = glowPrimaryRef.current;
+    const glowTertiary = glowTertiaryRef.current;
     if (!track || !intro || !detail || !indicator) return;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -34,12 +40,23 @@ export function Hero() {
       trigger: track,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.2, // Silky smooth scrubbing with luxurious cinematic inertia
+      scrub: 1.1, // Silky smooth scrubbing with luxurious cinematic inertia
       onUpdate: (self) => {
         const progress = reducedMotion ? 0 : self.progress;
 
         // Drive 3D Spool multi-axis rotation, position, dynamic light sweep, and camera dolly
         spoolRef.current?.setProgress(progress);
+
+        // Premium Effect 03: Magnetic Depth Parallax on ambient backdrop layers
+        if (bgGrid) {
+          bgGrid.style.transform = `translate3d(0, ${-42 * progress}px, 0)`;
+        }
+        if (glowPrimary) {
+          glowPrimary.style.transform = `translate3d(${-28 * progress}px, ${-48 * progress}px, 0)`;
+        }
+        if (glowTertiary) {
+          glowTertiary.style.transform = `translate3d(${20 * progress}px, ${38 * progress}px, 0)`;
+        }
 
         // Simulated high-frequency laser gauge readout during middle inspection phase
         if (gauge) {
@@ -48,19 +65,20 @@ export function Hero() {
           gauge.textContent = val;
         }
 
-        // Editorial Layer 1: Hero Entry ("Make it Real.") — deliberate, unhurried opening
-        const introOpacity = clamp(1 - progress / 0.22);
+        // Premium Effect 07: Micro-Parallax on Editorial Layer 1 ("Make it Real.")
+        const introOpacity = clamp(1 - progress / 0.20);
         intro.style.opacity = String(introOpacity);
-        intro.style.transform = `translate3d(0, ${-25 * progress}px, 0)`;
-        intro.style.pointerEvents = introOpacity > 0.4 ? 'auto' : 'none';
+        intro.style.transform = `translate3d(0, ${-32 * progress}px, 0)`;
+        intro.style.pointerEvents = introOpacity > 0.3 ? 'auto' : 'none';
 
-        // Editorial Layer 2: Technical Callouts & Precision Winding (Active across the extended 22% - 78% mid-section)
-        const detailIn = clamp((progress - 0.20) / 0.14);
-        const detailOut = clamp((0.86 - progress) / 0.12);
+        // Editorial Layer 2: Technical Callouts & Precision Winding (Active across the 20% - 82% mid-section)
+        const detailIn = clamp((progress - 0.18) / 0.12);
+        const detailOut = clamp((0.84 - progress) / 0.12);
         const detailOpacity = detailIn * detailOut;
+        const detailY = (1 - detailIn) * 22 - (progress - 0.3) * 14;
         detail.style.opacity = String(detailOpacity);
-        detail.style.transform = `translate3d(0, ${20 * (1 - detailIn)}px, 0)`;
-        detail.style.pointerEvents = detailOpacity > 0.4 ? 'auto' : 'none';
+        detail.style.transform = `translate3d(0, ${detailY}px, 0)`;
+        detail.style.pointerEvents = detailOpacity > 0.3 ? 'auto' : 'none';
 
         // Scroll prompt indicator gently fades out on initial scroll
         indicator.style.opacity = String(clamp(1 - progress * 10));
@@ -73,19 +91,26 @@ export function Hero() {
   }, []);
 
   return (
-    // Extended scroll runway (approx. 2.7x original scroll distance) for a luxurious, cinematic product showcase
-    <section ref={trackRef} className="hero-scroll-track relative h-[750svh] lg:h-[800svh] bg-ufill-background">
+    // Ultra-Premium Cinematic Scroll Runway (600vh - 650vh desktop distance)
+    <section ref={trackRef} className="hero-scroll-track relative h-[580svh] lg:h-[620svh] bg-ufill-background">
       {/* Sticky Viewport Container */}
       <div className="sticky top-0 h-svh min-h-[620px] w-full overflow-hidden bg-ufill-background flex items-center justify-center">
-        {/* Subtle Background Radial Matrix */}
+        {/* Subtle Background Radial Matrix with Magnetic Parallax */}
         <div
-          className="absolute inset-0 opacity-[0.035] pointer-events-none"
+          ref={bgGridRef}
+          className="absolute inset-0 opacity-[0.035] pointer-events-none will-change-transform"
           style={{ backgroundImage: 'radial-gradient(#11152E 1px, transparent 1px)', backgroundSize: '36px 36px' }}
         />
 
-        {/* Ambient Gradient Glows */}
-        <div className="absolute top-1/3 right-1/4 w-[650px] h-[650px] bg-ufill-secondary/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-ufill-tertiary/50 rounded-full blur-[120px] pointer-events-none" />
+        {/* Ambient Gradient Glows with Magnetic Depth Parallax */}
+        <div
+          ref={glowPrimaryRef}
+          className="absolute top-1/3 right-1/4 w-[650px] h-[650px] bg-ufill-secondary/10 rounded-full blur-[140px] pointer-events-none will-change-transform"
+        />
+        <div
+          ref={glowTertiaryRef}
+          className="absolute bottom-10 left-10 w-[500px] h-[500px] bg-ufill-tertiary/50 rounded-full blur-[120px] pointer-events-none will-change-transform"
+        />
 
         {/* Full-Viewport 3D WebGL Canvas Layer (Free & Unconstrained across the entire viewport) */}
         <div className="absolute inset-0 z-10 pointer-events-none">
