@@ -206,6 +206,11 @@ export function Hero() {
                   {currentTheme.description}
                 </p>
 
+                {/* Secondary Mobile Subheading (Mobile Only: 2-3 lines of precision engineering copy) */}
+                <p className="mt-2 text-[11px] leading-relaxed text-[#696969] font-medium lg:hidden">
+                  Continuous dual-axis optical inspection paired with tangle-free robotic winding. Calibrated for 600 mm/s high-speed CoreXY extrusion and zero nozzle clogs.
+                </p>
+
                 {/* Dedicated Mobile Spool Window (< lg only): gives the 3D spool its own clear stage */}
                 <div id="hero-mobile-spool-anchor" className="lg:hidden w-full h-[180px] sm:h-[220px] pointer-events-none my-1" aria-hidden="true" />
 
