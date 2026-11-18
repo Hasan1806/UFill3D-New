@@ -60,18 +60,18 @@ export function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 lg:gap-8">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center shrink-0">
             <UFillLogo 
-              className="h-8 sm:h-9" 
+              className="h-7 sm:h-8" 
               variant="dark"
-              showTagline={!isScrolled} 
+              showTagline={false} 
             />
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
             {navLinks.map((link) => {
               if (link.hasDropdown) {
                 return (
@@ -83,7 +83,7 @@ export function Navbar() {
                   >
                     <Link
                       href={link.href}
-                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/10 transition-colors rounded-xl"
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/10 transition-colors rounded-xl whitespace-nowrap"
                     >
                       <span>{link.label}</span>
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover:rotate-180" />
@@ -135,7 +135,7 @@ export function Navbar() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-colors rounded-xl ${
+                  className={`px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors rounded-xl whitespace-nowrap ${
                     isActive
                       ? 'text-white bg-white/15'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -148,7 +148,7 @@ export function Navbar() {
           </nav>
 
           {/* Right Utilities (Currency Selector, Search, Cart) */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <div className="hidden sm:flex items-center rounded-xl border border-white/15 bg-white/10 px-2.5 py-1.5 text-xs font-mono font-bold text-white">
               ₹ {currency}
             </div>
@@ -156,7 +156,7 @@ export function Navbar() {
             {/* Quick Link to Shop */}
             <Link
               href="/shop"
-              className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-white text-black hover:bg-white/90 shadow-xl transition-all duration-300"
+              className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider bg-white text-black hover:bg-white/90 shadow-xl transition-all duration-300 whitespace-nowrap"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Explore Spools</span>

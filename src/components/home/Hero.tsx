@@ -185,8 +185,8 @@ export function Hero() {
         </div>
 
         {/* Foreground Editorial Layer */}
-        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pointer-events-none">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[80vh]">
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-20 sm:pt-24 lg:pt-28 pb-8 pointer-events-none">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[75vh]">
             
             {/* Left Column Content Area */}
             <div className="lg:col-span-6 xl:col-span-7 relative flex flex-col justify-center">
