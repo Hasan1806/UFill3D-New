@@ -178,7 +178,7 @@ export function Hero() {
         />
 
         {/* Foreground Editorial Layer */}
-        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-16 sm:pt-20 lg:pt-16 pb-4 pointer-events-none">
+        <div className="relative z-30 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-14 sm:pt-20 lg:pt-16 pb-4 pointer-events-none">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[55vh] lg:min-h-[60vh]">
             
             {/* Left Column Content Area */}
@@ -190,7 +190,7 @@ export function Hero() {
                 className="w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
               >
                 {/* Precision Industrial Headline */}
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.1rem] font-extrabold uppercase leading-[0.96] tracking-tightest text-[#111111]">
+                <h1 className="text-2xl sm:text-5xl lg:text-6xl xl:text-[4.1rem] font-extrabold uppercase leading-[0.98] tracking-tightest text-[#111111]">
                   {currentTheme.headlineFirst} <br />
                   <span 
                     className="transition-colors duration-300 text-[#5401C5]"
@@ -201,14 +201,14 @@ export function Hero() {
 
                 {/* Subtitle / Product Description */}
                 <p 
-                  className="mt-3 sm:mt-4 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] transition-colors duration-300"
+                  className="mt-2.5 sm:mt-4 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] transition-colors duration-300"
                 >
                   {currentTheme.description}
                 </p>
 
                 {/* Interactive Masterbatch Color Switcher */}
-                <div className="mt-3.5 sm:mt-4 max-w-xl">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="mt-3 sm:mt-4 max-w-xl">
+                  <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                     <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] text-[#696969]">
                       Select Masterbatch Color:
                     </span>
@@ -220,7 +220,7 @@ export function Hero() {
                   </div>
 
                   {/* Horizontal Swatches */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5">
                     {HERO_THEMES.map((theme, idx) => {
                       const isActive = idx === activeThemeIndex;
                       return (
@@ -228,7 +228,7 @@ export function Hero() {
                           key={theme.id}
                           onClick={() => handleSelectTheme(idx)}
                           aria-label={`Switch to ${theme.name}`}
-                          className={`group relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all duration-200 ${
+                          className={`group relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-all duration-200 ${
                             isActive 
                               ? 'scale-110 shadow-md ring-2 ring-[#111111] ring-offset-2 ring-offset-white' 
                               : 'hover:scale-105 opacity-85 hover:opacity-100'
@@ -241,7 +241,7 @@ export function Hero() {
                         >
                           {isActive && (
                             <Check 
-                              className={`w-3.5 h-3.5 stroke-[3] ${
+                              className={`w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[3] ${
                                 theme.id === 'porcelain-white' ? 'text-black' : 'text-white'
                               }`} 
                             />
@@ -254,26 +254,26 @@ export function Hero() {
                 </div>
 
                 {/* Call-to-Action Buttons — Primary is Black with White Typography */}
-                <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
+                <div className="mt-3.5 sm:mt-5 flex flex-wrap items-center gap-2.5 sm:gap-4">
                   <button
                     onClick={handleAddToCart}
-                    className="group inline-flex items-center justify-center gap-2.5 rounded-xl px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95 shadow-md bg-[#111111] text-white hover:bg-[#252525]"
+                    className="group inline-flex items-center justify-center gap-2.5 rounded-xl px-5 sm:px-7 py-3 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95 shadow-md bg-[#111111] text-white hover:bg-[#252525]"
                   >
-                    <ShoppingBag className="h-4 w-4" />
+                    <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span>Add to Cart • {formatPrice(currentTheme.price, currency)}</span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
                   </button>
 
                   <Link
                     href={`/product/${currentTheme.productSlug}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl px-5 sm:px-6 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase border border-[#E5E5E5] bg-white text-[#111111] shadow-sm transition-all duration-200 hover:bg-[#F3F3F3] active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase border border-[#E5E5E5] bg-white text-[#111111] shadow-sm transition-all duration-200 hover:bg-[#F3F3F3] active:scale-95"
                   >
                     View Specs
                   </Link>
                 </div>
 
                 {/* Real Verified Specs Readouts */}
-                <div className="mt-4 sm:mt-5 grid max-w-lg grid-cols-3 gap-3 sm:gap-4 border-t border-[#E5E5E5] pt-3.5">
+                <div className="mt-3.5 sm:mt-5 grid max-w-lg grid-cols-3 gap-2.5 sm:gap-4 border-t border-[#E5E5E5] pt-2.5 sm:pt-3.5">
                   {currentTheme.metrics.map((metric) => (
                     <div key={metric.label}>
                       <strong 

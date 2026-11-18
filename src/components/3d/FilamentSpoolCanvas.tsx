@@ -893,7 +893,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
             const containerW = containerRef.current?.clientWidth || window.innerWidth;
             const containerH = containerRef.current?.clientHeight || window.innerHeight;
             const aspect = containerW / Math.max(1, containerH);
-            const isMobile = containerW < 640;
+            const isPhone = containerW < 640;
+            const isTablet = containerW >= 640 && containerW < 1024;
             const respX = containerW < 1440 || aspect < 1.85 ? 0.85 : 1.0;
             const respScale = containerW < 1440 || aspect < 1.85 ? 0.88 : 1.0;
 
@@ -916,11 +917,16 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
               let rotY = lerp(heroClimax.rotY, r0.rotY, easeShrink) + floatRotY + cursorTiltY;
               let rotZ = lerp(heroClimax.rotZ, r0.rotZ, easeShrink) + floatRotZ;
 
-              if (isMobile) {
+              if (isPhone) {
                 posX = floatX + cursorShiftX;
-                posY = lerp(0.0, 0.08, easeShrink) + floatY + cursorShiftY;
-                posZ = lerp(1.4, 0.0, easeShrink);
-                sc = lerp(heroClimax.scale * 0.70, s0 * 0.70, easeShrink);
+                posY = lerp(0.0, -0.25, easeShrink) + floatY + cursorShiftY;
+                posZ = lerp(1.1, 0.0, easeShrink);
+                sc = lerp(heroClimax.scale * 0.58, s0 * 0.45, easeShrink);
+              } else if (isTablet) {
+                posX = floatX + cursorShiftX;
+                posY = lerp(0.0, -0.10, easeShrink) + floatY + cursorShiftY;
+                posZ = lerp(1.25, 0.0, easeShrink);
+                sc = lerp(heroClimax.scale * 0.70, s0 * 0.60, easeShrink);
               }
 
               spoolGroupRef.current.position.set(posX, posY, posZ);
@@ -928,7 +934,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
               spoolGroupRef.current.scale.setScalar(sc);
 
               if (cameraRef.current) {
-                const baseCamZ = isMobile ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
+                const baseCamZ = isPhone ? 9.2 : isTablet ? 8.8 : aspect < 1.65 ? 8.5 : 8.1;
                 cameraRef.current.position.z = lerp(baseCamZ - heroClimax.dollyZ, baseCamZ, easeShrink);
               }
 
@@ -991,12 +997,18 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
               let posZ = pt.z;
               let sc = baseScale * respScale;
 
-              if (isMobile) {
-                const mobX = pt.x < 0 ? pt.x * 0.65 - 0.35 : pt.x * 0.50;
+              if (isPhone) {
+                const mobX = pt.x < 0 ? pt.x * 0.50 - 0.20 : pt.x * 0.40;
+                posX = mobX + floatX + cursorShiftX;
+                posY = (pt.y * 0.85 - 0.15) + floatY + cursorShiftY;
+                posZ = pt.z;
+                sc = sc * 0.45;
+              } else if (isTablet) {
+                const mobX = pt.x < 0 ? pt.x * 0.65 - 0.25 : pt.x * 0.50;
                 posX = mobX + floatX + cursorShiftX;
                 posY = (pt.y * 0.85) + floatY + cursorShiftY;
                 posZ = pt.z;
-                sc = sc * 0.70;
+                sc = sc * 0.65;
               }
 
               const rotX = baseRot.rotX + floatRotX + cursorTiltX;
@@ -1008,7 +1020,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
               spoolGroupRef.current.scale.setScalar(Math.max(0, sc));
 
               if (cameraRef.current) {
-                const baseCamZ = isMobile ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
+                const baseCamZ = isPhone ? 9.2 : isTablet ? 8.8 : aspect < 1.65 ? 8.5 : 8.1;
                 cameraRef.current.position.z = baseCamZ;
               }
 
@@ -1102,16 +1114,24 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           let sc = lerp(k1.scale, k2.scale, t);
           const dollyZ = lerp(k1.dollyZ, k2.dollyZ, t);
 
-          if (isMobile) {
+          const containerW = containerRef.current?.clientWidth || window.innerWidth;
+          const containerH = containerRef.current?.clientHeight || window.innerHeight;
+          const aspect = containerW / Math.max(1, containerH);
+          const isPhone = containerW < 640;
+          const isTablet = containerW >= 640 && containerW < 1024;
+
+          if (isPhone) {
             posX = floatX + cursorShiftX;
-            posY = lerp(0.50, -0.06, paced) + floatY + cursorShiftY;
-            posZ = lerp(0, 1.4, paced);
-            sc = sc * 0.70;
+            posY = lerp(-0.52, 0.00, paced) + floatY + cursorShiftY;
+            posZ = lerp(0, 1.1, paced);
+            sc = lerp(sc * 0.35, sc * 0.58, paced);
+          } else if (isTablet) {
+            posX = floatX + cursorShiftX;
+            posY = lerp(-0.25, 0.00, paced) + floatY + cursorShiftY;
+            posZ = lerp(0, 1.25, paced);
+            sc = lerp(sc * 0.50, sc * 0.70, paced);
           } else {
             // Adaptive positioning for laptops: check aspect ratio & viewport width
-            const containerW = containerRef.current?.clientWidth || window.innerWidth;
-            const containerH = containerRef.current?.clientHeight || window.innerHeight;
-            const aspect = containerW / Math.max(1, containerH);
             if (containerW < 1440 || aspect < 1.85) {
               posX = posX * 0.88 - 0.12;
               sc = sc * 0.92;
@@ -1123,10 +1143,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           spoolGroupRef.current.scale.setScalar(sc);
 
           if (cameraRef.current) {
-            const containerW = containerRef.current?.clientWidth || window.innerWidth;
-            const containerH = containerRef.current?.clientHeight || window.innerHeight;
-            const aspect = containerW / Math.max(1, containerH);
-            const baseCamZ = isMobile ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
+            const baseCamZ = isPhone ? 9.2 : isTablet ? 8.8 : aspect < 1.65 ? 8.5 : 8.1;
             cameraRef.current.position.z = baseCamZ - dollyZ;
           }
 
