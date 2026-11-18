@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { 
@@ -10,7 +11,8 @@ import {
   Sparkles, 
   Activity, 
   ShoppingBag, 
-  Check 
+  Check,
+  CreditCard
 } from 'lucide-react';
 import { HERO_THEMES } from '@/data/heroThemes';
 import { PRODUCTS } from '@/data/products';
@@ -21,8 +23,10 @@ import { useSpoolJourneyStore } from '@/lib/spool-journey-store';
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
 export function Hero() {
+  const router = useRouter();
   const [activeThemeIndex, setActiveThemeIndex] = useState(0);
   const [isChangingColor, setIsChangingColor] = useState(false);
+  const [addedAnimation, setAddedAnimation] = useState(false);
   const currentTheme = HERO_THEMES[activeThemeIndex];
 
   // DOM Refs
@@ -38,6 +42,7 @@ export function Hero() {
 
   // Cart integration
   const addItem = useCartStore((state) => state.addItem);
+  const openDrawer = useCartStore((state) => state.openDrawer);
   const currency = useCartStore((state) => state.currency);
 
   // Color Switch Handler
@@ -54,7 +59,7 @@ export function Hero() {
     }, 320);
   };
 
-  // Add current active hero spool to cart
+  // Add current active hero spool to cart & show feedback + open drawer
   const handleAddToCart = () => {
     const product = PRODUCTS.find((p) => p.slug === currentTheme.productSlug) || PRODUCTS[0];
     const colorVariant = product.colors.find((c) => c.name.toLowerCase() === currentTheme.name.toLowerCase()) || {
@@ -64,6 +69,24 @@ export function Hero() {
       inStock: true,
     };
     addItem(product, colorVariant, '1.75 mm', '1.0 kg', 1);
+    openDrawer();
+    setAddedAnimation(true);
+    setTimeout(() => {
+      setAddedAnimation(false);
+    }, 2400);
+  };
+
+  // Instant checkout: adds configured spool and routes directly to temporary checkout
+  const handleInstantCheckout = () => {
+    const product = PRODUCTS.find((p) => p.slug === currentTheme.productSlug) || PRODUCTS[0];
+    const colorVariant = product.colors.find((c) => c.name.toLowerCase() === currentTheme.name.toLowerCase()) || {
+      id: currentTheme.id,
+      name: currentTheme.name,
+      hex: currentTheme.filamentHex,
+      inStock: true,
+    };
+    addItem(product, colorVariant, '1.75 mm', '1.0 kg', 1);
+    router.push('/checkout');
   };
 
   // Initial Entrance Animation
@@ -84,6 +107,11 @@ export function Hero() {
     const bgMesh = bgMeshRef.current;
     const glow = ambientGlowRef.current;
     if (!track || !intro || !detail || !indicator) return;
+
+    // Explicitly initialize pointer events so dormant layers cannot intercept user interactions
+    intro.style.pointerEvents = 'auto';
+    detail.style.pointerEvents = 'none';
+    if (climax) climax.style.pointerEvents = 'none';
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -187,7 +215,7 @@ export function Hero() {
               {/* ACT 1: Hero Entry & Precision Industrial Presentation */}
               <div 
                 ref={introRef} 
-                className="w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
+                className="relative z-20 w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
               >
                 {/* Precision Industrial Headline with generous line-height to guarantee zero ascender clipping */}
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-[4.0rem] font-extrabold uppercase leading-[1.14] sm:leading-[1.05] tracking-tight sm:tracking-tightest text-[#111111] pt-1 pb-1">
@@ -234,9 +262,10 @@ export function Hero() {
                       return (
                         <button
                           key={theme.id}
+                          type="button"
                           onClick={() => handleSelectTheme(idx)}
                           aria-label={`Switch to ${theme.name}`}
-                          className={`group relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-all duration-200 ${
+                          className={`group relative flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-all duration-200 cursor-pointer ${
                             isActive 
                               ? 'scale-110 shadow-md ring-2 ring-[#111111] ring-offset-2 ring-offset-white' 
                               : 'hover:scale-105 opacity-85 hover:opacity-100'
@@ -261,20 +290,43 @@ export function Hero() {
                   </div>
                 </div>
 
-                {/* Call-to-Action Buttons — Primary is Black with White Typography */}
-                <div className="mt-3.5 sm:mt-5 flex flex-wrap items-center gap-2.5 sm:gap-4">
+                {/* Call-to-Action Buttons — Add to Cart & Instant Checkout */}
+                <div className="mt-3.5 sm:mt-5 flex flex-wrap items-center gap-2.5 sm:gap-3.5">
                   <button
+                    type="button"
                     onClick={handleAddToCart}
-                    className="group inline-flex items-center justify-center gap-2.5 rounded-xl px-5 sm:px-7 py-3 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95 shadow-md bg-[#111111] text-white hover:bg-[#252525]"
+                    className={`group inline-flex items-center justify-center gap-2 sm:gap-2.5 rounded-xl px-4 sm:px-6 py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95 shadow-md cursor-pointer ${
+                      addedAnimation
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-[#111111] text-white hover:bg-[#252525]'
+                    }`}
                   >
-                    <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span>Add to Cart • {formatPrice(currentTheme.price, currency)}</span>
-                    <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
+                    {addedAnimation ? (
+                      <>
+                        <Check className="h-4 w-4 stroke-[3]" />
+                        <span>Added to Cart!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span>Add to Cart • {formatPrice(currentTheme.price, currency)}</span>
+                        <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleInstantCheckout}
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wide uppercase border-2 border-[#5401C5] bg-[#5401C5] text-white shadow-sm transition-all duration-200 hover:bg-[#4501a3] active:scale-95 cursor-pointer"
+                  >
+                    <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>Instant Checkout</span>
                   </button>
 
                   <Link
                     href={`/product/${currentTheme.productSlug}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase border border-[#E5E5E5] bg-white text-[#111111] shadow-sm transition-all duration-200 hover:bg-[#F3F3F3] active:scale-95"
+                    className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-3.5 sm:px-5 py-3 sm:py-3.5 text-xs sm:text-sm font-bold tracking-wide uppercase border border-[#E5E5E5] bg-white text-[#111111] shadow-sm transition-all duration-200 hover:bg-[#F3F3F3] active:scale-95"
                   >
                     View Specs
                   </Link>
@@ -325,7 +377,7 @@ export function Hero() {
                 </p>
 
                 {/* Live Laser Micrometer HUD Card */}
-                <div className="mt-6 p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-xl max-w-lg space-y-3.5 pointer-events-auto">
+                <div className="mt-6 p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-xl max-w-lg space-y-3.5">
                   <div className="flex items-center justify-between text-xs border-b border-[#E5E5E5] pb-3">
                     <span className="font-mono uppercase font-bold text-[#252525] flex items-center gap-2 text-[11px]">
                       <span className="relative flex h-2 w-2">
@@ -365,7 +417,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex items-center gap-4 pointer-events-auto">
+                <div className="mt-6 flex items-center gap-4">
                   <Link
                     href="/shop"
                     className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#111111] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#252525] transition-all shadow-md active:scale-95"
@@ -434,7 +486,7 @@ export function Hero() {
             </div>
 
             {/* Smooth Scroll CTA Bridge to Section 2 */}
-            <div className="mt-4 sm:mt-6 pointer-events-auto">
+            <div className="mt-4 sm:mt-6">
               <a
                 href="#color-studio"
                 className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-[#111111] text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 hover:bg-[#252525] active:scale-95 shadow-md"
