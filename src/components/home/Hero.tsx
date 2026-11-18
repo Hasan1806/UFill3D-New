@@ -207,7 +207,7 @@ export function Hero() {
                 </p>
 
                 {/* Dedicated Mobile Spool Window (< lg only): gives the 3D spool its own clear stage */}
-                <div className="lg:hidden w-full h-[180px] sm:h-[220px] pointer-events-none my-1" aria-hidden="true" />
+                <div id="hero-mobile-spool-anchor" className="lg:hidden w-full h-[180px] sm:h-[220px] pointer-events-none my-1" aria-hidden="true" />
 
                 {/* Interactive Masterbatch Color Switcher */}
                 <div className="mt-2.5 sm:mt-4 max-w-xl">

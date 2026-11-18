@@ -1118,25 +1118,56 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           const isPhone = containerW < 640 || aspect < 0.75;
           const isTablet = (containerW >= 640 && containerW < 1024) || (aspect >= 0.75 && aspect < 1.15);
 
-          if (isPhone) {
-            // Mobile: Perfectly centered in the blank stage window between text & swatches (zero text overlap)
-            posX = floatX + cursorShiftX;
-            posY = lerp(0.65, 0.20, paced) + floatY + cursorShiftY;
-            posZ = lerp(0, 0.45, paced);
-            sc = lerp(0.28, 0.52, paced);
-          } else if (isTablet) {
-            // Tablet: Centered with comfortable scale
-            posX = floatX + cursorShiftX;
-            posY = lerp(0.40, 0.16, paced) + floatY + cursorShiftY;
-            posZ = lerp(0, 0.60, paced);
-            sc = lerp(0.36, 0.65, paced);
-          } else {
-            // Desktop: Adaptive positioning for laptops & ultra-wides, generous right margin
-            if (containerW < 1366 || aspect < 1.70) {
-              posX = posX * 0.84 - 0.08;
-              sc = sc * 0.88;
-            } else if (containerW > 1800 && aspect > 2.0) {
-              posX = Math.min(posX * 1.15, 1.35);
+          // Direct anchor detection for the mobile empty space below heading & subheading
+          const mobileAnchor = typeof document !== 'undefined' ? document.getElementById('hero-mobile-spool-anchor') : null;
+          let anchoredOnMobile = false;
+
+          if (mobileAnchor && (isPhone || isTablet || containerW < 1024)) {
+            const rect = mobileAnchor.getBoundingClientRect();
+            if (rect.height > 10 && rect.width > 10) {
+              anchoredOnMobile = true;
+              const centerY = rect.top + rect.height / 2;
+              const centerX = rect.left + rect.width / 2;
+              const ndcY = -(centerY / containerH) * 2 + 1;
+              const ndcX = (centerX / containerW) * 2 - 1;
+              const halfFovY = (38 / 2) * (Math.PI / 180);
+              const camDistance = isPhone ? 8.8 : 8.4;
+              const visibleHalfHeight = Math.tan(halfFovY) * camDistance;
+              const visibleHalfWidth = visibleHalfHeight * aspect;
+
+              const targetWorldY = ndcY * visibleHalfHeight;
+              const targetWorldX = ndcX * visibleHalfWidth;
+              const maxPixelDiameter = Math.min(rect.height * 0.88, rect.width * 0.65, 175);
+              const targetScale = (maxPixelDiameter / containerH) * (visibleHalfHeight * 2) / 4.30;
+
+              posX = lerp(targetWorldX, 0.00, paced) + floatX + cursorShiftX;
+              posY = lerp(targetWorldY, 0.18, paced) + floatY + cursorShiftY;
+              posZ = lerp(0, 0.45, paced);
+              sc = lerp(targetScale, 0.52, paced);
+            }
+          }
+
+          if (!anchoredOnMobile) {
+            if (isPhone) {
+              // Mobile fallback: centered in the blank stage window between text & swatches
+              posX = floatX + cursorShiftX;
+              posY = lerp(0.65, 0.20, paced) + floatY + cursorShiftY;
+              posZ = lerp(0, 0.45, paced);
+              sc = lerp(0.28, 0.52, paced);
+            } else if (isTablet) {
+              // Tablet: Centered with comfortable scale
+              posX = floatX + cursorShiftX;
+              posY = lerp(0.40, 0.16, paced) + floatY + cursorShiftY;
+              posZ = lerp(0, 0.60, paced);
+              sc = lerp(0.36, 0.65, paced);
+            } else {
+              // Desktop: Adaptive positioning for laptops & ultra-wides, generous right margin
+              if (containerW < 1366 || aspect < 1.70) {
+                posX = posX * 0.84 - 0.08;
+                sc = sc * 0.88;
+              } else if (containerW > 1800 && aspect > 2.0) {
+                posX = Math.min(posX * 1.15, 1.35);
+              }
             }
           }
 
