@@ -28,7 +28,6 @@ interface MaterialFamily {
   nozzleTemp: string;
   bedTemp: string;
   accent: string;
-  accentBg: string;
   idealFor: string[];
 }
 
@@ -49,8 +48,7 @@ export function MaterialShowcase() {
       tensileStrength: '59 MPa',
       nozzleTemp: '200 - 225 °C',
       bedTemp: '50 - 65 °C',
-      accent: '#6258F5',
-      accentBg: '#19154E',
+      accent: '#5401C5',
       idealFor: [
         'Industrial Concept Prototyping',
         'Precision Mechanical Fit Checks',
@@ -70,8 +68,7 @@ export function MaterialShowcase() {
       tensileStrength: '64 MPa',
       nozzleTemp: '215 - 240 °C',
       bedTemp: '55 - 65 °C',
-      accent: '#EF4444',
-      accentBg: '#4A080C',
+      accent: '#DC2626',
       idealFor: [
         'High-Acceleration Production Farms',
         'Functional Brackets & Robotics',
@@ -92,7 +89,6 @@ export function MaterialShowcase() {
       nozzleTemp: '230 - 255 °C',
       bedTemp: '70 - 85 °C',
       accent: '#06B6D4',
-      accentBg: '#072A38',
       idealFor: [
         'Outdoor Sensor & Camera Housings',
         'Chemical-Contact Lab Fixtures',
@@ -112,8 +108,7 @@ export function MaterialShowcase() {
       tensileStrength: '71 MPa',
       nozzleTemp: '215 - 245 °C',
       bedTemp: '55 - 65 °C',
-      accent: '#E2E8F0',
-      accentBg: '#0B0D13',
+      accent: '#181818',
       idealFor: [
         'Aerospace Drone Arms & Gimbals',
         'High-Stiffness Robotic End-Effectors',
@@ -134,7 +129,6 @@ export function MaterialShowcase() {
       nozzleTemp: '220 - 245 °C',
       bedTemp: '40 - 60 °C',
       accent: '#F97316',
-      accentBg: '#4B1806',
       idealFor: [
         'Vibration Dampers & Motor Mounts',
         'Industrial Protective Gaskets & Seals',
@@ -149,40 +143,27 @@ export function MaterialShowcase() {
   return (
     <section 
       id="materials-applications"
-      className="relative overflow-hidden py-24 sm:py-36 bg-[#0B0E20] text-white border-b border-white/10 select-none"
+      className="relative overflow-hidden py-24 sm:py-36 bg-[#FAFAFA] text-[#252525] border-b border-[#E5E5E5] select-none"
     >
-      {/* Background Matrix */}
-      <div 
-        className="absolute inset-0 opacity-[0.035] pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px)`,
-          backgroundSize: '40px 40px',
-        }}
-      />
-      <div 
-        className="absolute top-1/2 right-1/4 w-[650px] h-[650px] rounded-full blur-[160px] opacity-25 pointer-events-none transition-colors duration-700"
-        style={{ backgroundColor: activeMaterial.accent }}
-      />
-
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
         
         {/* Editorial Header */}
-        <div className="mb-14 grid gap-6 border-b border-white/10 pb-10 lg:grid-cols-12 lg:items-end">
+        <div className="mb-14 grid gap-6 border-b border-[#E5E5E5] pb-10 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-8 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold uppercase tracking-[0.2em] border border-white/15">
-              <Layers className="w-3.5 h-3.5 text-white" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#111111] text-xs font-bold uppercase tracking-[0.2em] border border-[#E5E5E5] shadow-sm">
+              <Layers className="w-3.5 h-3.5 text-[#5401C5]" />
               <span>Section 04 • Material Architectures</span>
             </div>
 
-            <h2 className="text-4xl sm:text-6xl font-extrabold uppercase leading-[0.92] tracking-tightest text-white">
+            <h2 className="text-4xl sm:text-6xl font-extrabold uppercase leading-[0.92] tracking-tightest text-[#111111]">
               Five Material Families. <br />
-              <span style={{ color: activeMaterial.accent }}>
+              <span className="text-[#5401C5]">
                 One Exacting Standard.
               </span>
             </h2>
           </div>
 
-          <p className="max-w-md text-sm sm:text-base leading-relaxed text-white/70 lg:col-span-4 lg:justify-self-end">
+          <p className="max-w-md text-sm sm:text-base leading-relaxed text-[#696969] lg:col-span-4 lg:justify-self-end">
             From rapid aesthetic prototypes to high-modulus structural tooling, each formulation is tailored with specific molecular modifiers for peak performance.
           </p>
         </div>
@@ -195,10 +176,10 @@ export function MaterialShowcase() {
               <button
                 key={mat.slug}
                 onClick={() => setSelectedMaterialSlug(mat.slug)}
-                className={`px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
+                className={`px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
                   isSelected
-                    ? 'bg-white text-black shadow-xl scale-105'
-                    : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/15 border border-white/10'
+                    ? 'bg-[#111111] text-white shadow-sm scale-105'
+                    : 'bg-white text-[#696969] hover:text-[#111111] hover:bg-[#F3F3F3] border border-[#E5E5E5]'
                 }`}
               >
                 {mat.name.split(' ')[0]} {mat.name.includes('+') ? '+' : ''}
@@ -208,61 +189,61 @@ export function MaterialShowcase() {
         </div>
 
         {/* Active Material Deep Dive Spotlight Card */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-2xl transition-all duration-500">
+        <div className="p-8 sm:p-12 rounded-3xl bg-white border border-[#E5E5E5] shadow-xl transition-all duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-xs font-mono font-bold uppercase tracking-wider text-white border border-white/15">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F3F3F3] text-xs font-mono font-bold uppercase tracking-wider text-[#111111] border border-[#E5E5E5]">
                 <span>{activeMaterial.badge}</span>
               </div>
 
-              <h3 className="text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-white">
+              <h3 className="text-3xl sm:text-5xl font-extrabold uppercase tracking-tight text-[#111111]">
                 {activeMaterial.name}
               </h3>
 
-              <p className="text-sm sm:text-base text-white/80 leading-relaxed">
+              <p className="text-sm sm:text-base text-[#696969] leading-relaxed">
                 {activeMaterial.description}
               </p>
 
               {/* Real World Applications */}
               <div className="space-y-3 pt-2">
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/60 block">
+                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#696969] block">
                   Verified Real-World Engineering Applications:
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {activeMaterial.idealFor.map((app) => (
                     <div
                       key={app}
-                      className="flex items-center gap-2.5 p-3 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-white/90"
+                      className="flex items-center gap-2.5 p-3 rounded-xl bg-[#F3F3F3] border border-[#E5E5E5] text-xs font-medium text-[#252525]"
                     >
-                      <CircleDot className="w-3.5 h-3.5 shrink-0" style={{ color: activeMaterial.accent }} />
+                      <CircleDot className="w-3.5 h-3.5 shrink-0 text-[#5401C5]" />
                       <span>{app}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons — Primary is Black with White Typography */}
               <div className="pt-4 flex flex-wrap items-center gap-4">
                 <Link
                   href={`/product/${activeMaterial.slug}`}
-                  className="inline-flex items-center gap-2.5 px-6 py-4 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-white/90 shadow-xl transition-all active:scale-95"
+                  className="inline-flex items-center gap-2.5 px-6 py-4 rounded-xl bg-[#111111] text-white font-extrabold text-xs uppercase tracking-wider hover:bg-[#252525] shadow-md transition-all active:scale-95"
                 >
                   <span>Shop {activeMaterial.name.split(' ')[0]}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
                 <Link
-                  href={`/materials/${activeMaterial.slug.split('-')[0]}`}
-                  className="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-xs uppercase tracking-wider hover:bg-white/20 transition-all backdrop-blur-md"
+                  href={`/materials`}
+                  className="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-white border border-[#E5E5E5] text-[#111111] font-bold text-xs uppercase tracking-wider hover:bg-[#F3F3F3] transition-all shadow-sm"
                 >
                   Datasheet & Profile
                 </Link>
 
                 <div className="ml-auto pl-4 hidden sm:block">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/60 block">Starting at</span>
-                  <strong className="text-xl font-mono font-extrabold text-white">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#696969] block">Starting at</span>
+                  <strong className="text-xl font-mono font-extrabold text-[#111111]">
                     {formatPrice(activeMaterial.startingPrice, currency)} / 1 kg
                   </strong>
                 </div>
@@ -270,48 +251,48 @@ export function MaterialShowcase() {
             </div>
 
             {/* Right Technical Metrology Specs Matrix */}
-            <div className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-white/5 border border-white/10 space-y-5">
-              <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-white/70 border-b border-white/10 pb-3">
+            <div className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-[#F3F3F3] border border-[#E5E5E5] space-y-5">
+              <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-[#696969] border-b border-[#E5E5E5] pb-3">
                 Thermal & Mechanical Profile
               </h4>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/60 block">Heat Deflection</span>
-                  <strong className="text-2xl font-extrabold font-mono text-white mt-0.5 block">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#696969] block">Heat Deflection</span>
+                  <strong className="text-2xl font-extrabold font-mono text-[#111111] mt-0.5 block">
                     {activeMaterial.heatDeflection}
                   </strong>
-                  <span className="text-[10px] text-white/50">@ 0.45 MPa load</span>
+                  <span className="text-[10px] text-[#696969]">@ 0.45 MPa load</span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/60 block">Rated Speed</span>
-                  <strong className="text-2xl font-extrabold font-mono text-emerald-400 mt-0.5 block">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#696969] block">Rated Speed</span>
+                  <strong className="text-2xl font-extrabold font-mono text-emerald-600 mt-0.5 block">
                     {activeMaterial.printSpeed}
                   </strong>
-                  <span className="text-[10px] text-white/50">CoreXY kinematic</span>
+                  <span className="text-[10px] text-[#696969]">CoreXY kinematic</span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/60 block">Tensile Strength</span>
-                  <strong className="text-2xl font-extrabold font-mono text-white mt-0.5 block">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#696969] block">Tensile Strength</span>
+                  <strong className="text-2xl font-extrabold font-mono text-[#111111] mt-0.5 block">
                     {activeMaterial.tensileStrength}
                   </strong>
-                  <span className="text-[10px] text-white/50">ASTM D638</span>
+                  <span className="text-[10px] text-[#696969]">ASTM D638</span>
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/60 block">Nozzle Window</span>
-                  <strong className="text-2xl font-extrabold font-mono text-white mt-0.5 block">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#696969] block">Nozzle Window</span>
+                  <strong className="text-2xl font-extrabold font-mono text-[#111111] mt-0.5 block">
                     {activeMaterial.nozzleTemp.split(' ')[0]}°
                   </strong>
-                  <span className="text-[10px] text-white/50">{activeMaterial.nozzleTemp}</span>
+                  <span className="text-[10px] text-[#696969]">{activeMaterial.nozzleTemp}</span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-                <span className="text-white/60 font-mono">Bed Temperature:</span>
-                <span className="font-mono font-bold text-white">{activeMaterial.bedTemp}</span>
+              <div className="pt-3 border-t border-[#E5E5E5] flex items-center justify-between text-xs">
+                <span className="text-[#696969] font-mono">Bed Temperature:</span>
+                <span className="font-mono font-bold text-[#111111]">{activeMaterial.bedTemp}</span>
               </div>
             </div>
 

@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 interface LogoProps {
   className?: string;
-  variant?: 'light' | 'dark' | 'auto';
+  variant?: 'light' | 'dark' | 'auto' | 'white';
   showTagline?: boolean;
 }
 
@@ -15,7 +15,10 @@ export function UFillLogo({
   variant = 'auto',
   showTagline = false,
 }: LogoProps) {
-  const isDark = variant === 'dark';
+  // 'white' or 'light' = white logo for dark surfaces.
+  // 'dark' or 'auto' (default) = original black-and-royal-violet logo for light surfaces.
+  const isWhiteLogo = variant === 'white' || variant === 'light';
+
   return (
     <Link 
       href="/" 
@@ -24,7 +27,7 @@ export function UFillLogo({
     >
       <div className="relative flex items-center shrink-0">
         <Image
-          src={isDark ? '/images/ufill3d-logo-white.png' : '/images/ufill3d-logo-dark.png'}
+          src={isWhiteLogo ? '/images/ufill3d-logo-white.png' : '/images/ufill3d-logo-dark.png'}
           alt="UFill3D Official Logo"
           width={180}
           height={32}
@@ -33,7 +36,7 @@ export function UFillLogo({
         />
       </div>
       {showTagline && (
-        <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-ufill-secondary ml-2 select-none whitespace-nowrap hidden sm:inline-block">
+        <span className="text-[10px] uppercase font-bold tracking-[0.25em] text-[#5401C5] ml-2 select-none whitespace-nowrap hidden sm:inline-block">
           Make it Real.
         </span>
       )}

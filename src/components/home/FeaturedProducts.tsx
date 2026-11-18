@@ -64,12 +64,12 @@ export function FeaturedProducts() {
   return (
     <section 
       id="product-collection"
-      className="py-24 sm:py-36 bg-[#0E1224] text-white relative overflow-hidden border-b border-white/10 select-none"
+      className="py-24 sm:py-36 bg-[#FAFAFA] text-[#252525] relative overflow-hidden border-b border-[#E5E5E5] select-none"
     >
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-white text-black font-bold text-xs shadow-2xl animate-fade-in">
-          <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#111111] text-white font-bold text-xs shadow-2xl animate-fade-in">
+          <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
           <span>{notification}</span>
         </div>
       )}
@@ -77,15 +77,15 @@ export function FeaturedProducts() {
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 border-b border-white/10 pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 border-b border-[#E5E5E5] pb-8">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-white text-xs font-bold uppercase tracking-[0.2em] border border-white/15">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#111111] text-xs font-bold uppercase tracking-[0.2em] border border-[#E5E5E5] shadow-sm">
               <span>Section 05 • Flagship Spool Catalog</span>
             </div>
-            <h2 className="text-4xl sm:text-6xl font-extrabold uppercase leading-[0.92] tracking-tightest text-white">
+            <h2 className="text-4xl sm:text-6xl font-extrabold uppercase leading-[0.92] tracking-tightest text-[#111111]">
               The Production Line.
             </h2>
-            <p className="text-sm sm:text-base text-white/70 max-w-xl">
+            <p className="text-sm sm:text-base text-[#696969] max-w-xl">
               Every spool is vacuum-sealed with high-absorption molecular desiccant inside a moisture-barrier bag.
             </p>
           </div>
@@ -96,10 +96,10 @@ export function FeaturedProducts() {
               <button
                 key={filter}
                 onClick={() => setSelectedFilter(filter)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                   selectedFilter === filter
-                    ? 'bg-white text-black shadow-lg scale-105'
-                    : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/20 border border-white/10'
+                    ? 'bg-[#111111] text-white shadow-sm scale-105'
+                    : 'bg-white text-[#696969] hover:text-[#111111] hover:bg-[#F3F3F3] border border-[#E5E5E5]'
                 }`}
               >
                 {filter}
@@ -113,28 +113,28 @@ export function FeaturedProducts() {
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="group bg-black/40 backdrop-blur-xl rounded-3xl border border-white/15 overflow-hidden hover:border-white/40 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
+              className="group bg-white rounded-3xl border border-[#E5E5E5] overflow-hidden hover:border-[#111111]/30 hover:shadow-xl transition-all duration-300 flex flex-col justify-between shadow-sm"
             >
               {/* Product Visual Top */}
-              <div className="relative aspect-[4/3] bg-gradient-to-b from-white/10 to-black/30 p-6 flex items-center justify-center overflow-hidden">
+              <div className="relative aspect-[4/3] bg-[#F3F3F3] p-6 flex items-center justify-center overflow-hidden">
                 {product.badge && (
-                  <div className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-mono uppercase tracking-wider backdrop-blur-md">
+                  <div className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full bg-white/90 border border-[#E5E5E5] text-[#111111] text-[10px] font-mono uppercase tracking-wider shadow-sm">
                     {product.badge}
                   </div>
                 )}
 
-                <div className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-xs text-amber-400 font-mono">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="font-bold text-white">{product.rating}</span>
+                <div className="absolute top-4 right-4 z-10 flex items-center gap-1 bg-white/90 shadow-sm px-2.5 py-1 rounded-full text-xs text-amber-500 font-mono">
+                  <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                  <span className="font-bold text-[#111111]">{product.rating}</span>
                 </div>
 
                 {/* Spool Image */}
-                <div className="relative w-48 h-48 sm:w-56 sm:h-56 transition-transform duration-500 group-hover:scale-110">
+                <div className="relative w-48 h-48 sm:w-56 sm:h-56 transition-transform duration-500 group-hover:scale-105">
                   <Image
                     src={product.images[0] || 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80'}
                     alt={product.name}
                     fill
-                    className="object-cover rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity"
+                    className="object-cover rounded-2xl"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
@@ -143,7 +143,7 @@ export function FeaturedProducts() {
                 <div className="absolute inset-x-4 bottom-4 flex gap-2 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                   <button
                     onClick={(e) => handleQuickAdd(product, e)}
-                    className="flex-1 py-3 px-4 bg-white text-black font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-xl flex items-center justify-center gap-2 hover:bg-white/90 active:scale-95 transition-all"
+                    className="flex-1 py-3 px-4 bg-[#111111] text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-2 hover:bg-[#252525] active:scale-95 transition-all"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     <span>Quick Add • {formatPrice(product.price, currency)}</span>
@@ -151,7 +151,7 @@ export function FeaturedProducts() {
                   <button
                     onClick={(e) => openQuickView(product, e)}
                     aria-label="Quick View Product"
-                    className="p-3 bg-white/20 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-white/30 transition-all"
+                    className="p-3 bg-white text-[#111111] rounded-xl border border-[#E5E5E5] hover:bg-[#F3F3F3] shadow-md transition-all"
                   >
                     <Eye className="w-4 h-4" />
                   </button>
@@ -161,18 +161,18 @@ export function FeaturedProducts() {
               {/* Product Info Bottom */}
               <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <div className="flex items-center justify-between text-xs text-white/60 font-mono mb-1">
+                  <div className="flex items-center justify-between text-xs text-[#696969] font-mono mb-1">
                     <span>{product.material}</span>
                     <span>{product.specs.tolerance}</span>
                   </div>
 
-                  <Link href={`/product/${product.slug}`} className="group-hover:text-emerald-400 transition-colors">
-                    <h3 className="text-xl font-bold uppercase tracking-tight text-white">
+                  <Link href={`/product/${product.slug}`} className="hover:text-[#5401C5] transition-colors">
+                    <h3 className="text-xl font-bold uppercase tracking-tight text-[#111111]">
                       {product.name}
                     </h3>
                   </Link>
 
-                  <p className="text-xs text-white/70 mt-2 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#696969] mt-2 line-clamp-2 leading-relaxed">
                     {product.description}
                   </p>
                 </div>
@@ -184,12 +184,12 @@ export function FeaturedProducts() {
                       <span
                         key={color.id}
                         title={color.name}
-                        className="w-4 h-4 rounded-full border border-white/30"
+                        className="w-4 h-4 rounded-full border border-black/10 shadow-sm"
                         style={{ backgroundColor: color.hex }}
                       />
                     ))}
                     {product.colors.length > 6 && (
-                      <span className="text-[10px] font-mono text-white/60 ml-1">
+                      <span className="text-[10px] font-mono text-[#696969] ml-1">
                         +{product.colors.length - 6} more
                       </span>
                     )}
@@ -197,13 +197,13 @@ export function FeaturedProducts() {
                 </div>
 
                 {/* Price and Details */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                <div className="pt-4 border-t border-[#E5E5E5] flex items-center justify-between">
                   <div>
-                    <span className="text-2xl font-extrabold font-mono text-white">
+                    <span className="text-2xl font-extrabold font-mono text-[#111111]">
                       {formatPrice(product.price, currency)}
                     </span>
                     {product.originalPrice && (
-                      <span className="ml-2 text-xs line-through text-white/40 font-mono">
+                      <span className="ml-2 text-xs line-through text-[#696969] font-mono">
                         {formatPrice(product.originalPrice, currency)}
                       </span>
                     )}
@@ -211,7 +211,7 @@ export function FeaturedProducts() {
 
                   <Link
                     href={`/product/${product.slug}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-white hover:text-emerald-400 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#111111] hover:text-[#5401C5] transition-colors"
                   >
                     <span>Inspect</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -226,17 +226,17 @@ export function FeaturedProducts() {
 
       {/* Quick View Modal */}
       {quickViewProduct && quickColor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-2xl bg-[#11152E] border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-2xl bg-white border border-[#E5E5E5] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-[#252525]">
             <button
               onClick={() => setQuickViewProduct(null)}
-              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+              className="absolute top-5 right-5 p-2 rounded-full bg-[#F3F3F3] text-[#111111] hover:bg-[#E5E5E5] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-black/40 border border-white/10">
+              <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F3F3F3] border border-[#E5E5E5]">
                 <Image
                   src={quickViewProduct.images[0] || ''}
                   alt={quickViewProduct.name}
@@ -246,22 +246,22 @@ export function FeaturedProducts() {
               </div>
 
               <div className="space-y-4">
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-400">
+                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#5401C5] font-bold">
                   {quickViewProduct.material} • {quickViewProduct.specs.tolerance}
                 </span>
 
-                <h3 className="text-2xl font-extrabold uppercase text-white">
+                <h3 className="text-2xl font-extrabold uppercase text-[#111111]">
                   {quickViewProduct.name}
                 </h3>
 
-                <p className="text-xs text-white/70 line-clamp-3 leading-relaxed">
+                <p className="text-xs text-[#696969] line-clamp-3 leading-relaxed">
                   {quickViewProduct.description}
                 </p>
 
                 {/* Color Choice */}
                 <div>
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-white/60 block mb-2">
-                    Select Color: <strong className="text-white">{quickColor.name}</strong>
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-[#696969] block mb-2">
+                    Select Color: <strong className="text-[#111111]">{quickColor.name}</strong>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {quickViewProduct.colors.map((c) => (
@@ -269,7 +269,7 @@ export function FeaturedProducts() {
                         key={c.id}
                         onClick={() => setQuickColor(c)}
                         className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                          quickColor.id === c.id ? 'border-white scale-110 shadow-lg' : 'border-white/30 hover:scale-105'
+                          quickColor.id === c.id ? 'border-[#111111] scale-110 shadow-md' : 'border-[#E5E5E5] hover:scale-105'
                         }`}
                         style={{ backgroundColor: c.hex }}
                       />
@@ -277,15 +277,15 @@ export function FeaturedProducts() {
                   </div>
                 </div>
 
-                {/* Price & Add */}
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                  <span className="text-2xl font-mono font-extrabold text-white">
+                {/* Price & Add — Black Button with White Text */}
+                <div className="pt-3 border-t border-[#E5E5E5] flex items-center justify-between">
+                  <span className="text-2xl font-mono font-extrabold text-[#111111]">
                     {formatPrice(quickViewProduct.price, currency)}
                   </span>
 
                   <button
                     onClick={handleModalAddToCart}
-                    className="px-6 py-3 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-wider hover:bg-white/90 shadow-xl"
+                    className="px-6 py-3 rounded-xl bg-[#111111] text-white font-extrabold text-xs uppercase tracking-wider hover:bg-[#252525] shadow-md transition-all active:scale-95"
                   >
                     Add to Cart
                   </button>

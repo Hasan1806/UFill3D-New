@@ -12,11 +12,11 @@ import {
   ShoppingBag, 
   Check 
 } from 'lucide-react';
-import { FilamentSpoolCanvas, SpoolCanvasHandle } from '@/components/3d/FilamentSpoolCanvas';
 import { HERO_THEMES } from '@/data/heroThemes';
 import { PRODUCTS } from '@/data/products';
 import { useCartStore } from '@/lib/cart-store';
 import { formatPrice } from '@/lib/currency';
+import { useSpoolJourneyStore } from '@/lib/spool-journey-store';
 
 const clamp = (value: number, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
@@ -33,7 +33,6 @@ export function Hero() {
   const climaxRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const liveGaugeRef = useRef<HTMLSpanElement>(null);
-  const spoolRef = useRef<SpoolCanvasHandle>(null);
   const bgMeshRef = useRef<HTMLDivElement>(null);
   const ambientGlowRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +46,7 @@ export function Hero() {
     setIsChangingColor(true);
     const nextTheme = HERO_THEMES[index];
 
-    spoolRef.current?.triggerColorSwitch(nextTheme.filamentHex, nextTheme.finish, nextTheme.accentColor);
+    useSpoolJourneyStore.getState().setColor(nextTheme.filamentHex, nextTheme.finish, nextTheme.accentColor);
 
     setTimeout(() => {
       setActiveThemeIndex(index);
@@ -69,7 +68,7 @@ export function Hero() {
 
   // Initial Entrance Animation
   useEffect(() => {
-    spoolRef.current?.triggerEntrance();
+    useSpoolJourneyStore.getState().triggerEntrance();
   }, []);
 
   // GSAP ScrollTrigger Integration
@@ -88,7 +87,7 @@ export function Hero() {
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Fast, responsive scrub (0.3s instead of 1.1s lag)
+    // Fast, responsive scrub (0.25s)
     const st = ScrollTrigger.create({
       trigger: track,
       start: 'top top',
@@ -96,9 +95,6 @@ export function Hero() {
       scrub: 0.25,
       onUpdate: (self) => {
         const progress = reducedMotion ? 0 : self.progress;
-
-        // Drive 3D Spool multi-axis rotation, position, dynamic light sweep, and camera dolly
-        spoolRef.current?.setProgress(progress);
 
         // Ambient depth parallax
         if (bgMesh) {
@@ -118,7 +114,7 @@ export function Hero() {
         // Editorial Layer 1 Parallax & Fade (Active 0% - 35%)
         const introOpacity = clamp(1 - (progress - 0.12) / 0.20);
         intro.style.opacity = String(introOpacity);
-        intro.style.transform = `translate3d(0, ${-20 * progress}px, 0)`;
+        intro.style.transform = `translate3d(0, ${-12 * progress}px, 0)`;
         intro.style.pointerEvents = introOpacity > 0.2 ? 'auto' : 'none';
 
         // Editorial Layer 2: Technical Metrology Inspection (Active 30% - 85%)
@@ -157,22 +153,22 @@ export function Hero() {
       {/* Sticky Full-Viewport Stage */}
       <div 
         ref={viewportRef}
-        className="sticky top-0 h-svh min-h-[600px] w-full overflow-hidden flex items-center justify-center transition-colors duration-500 ease-in-out"
+        className="sticky top-0 h-svh min-h-[580px] w-full overflow-hidden flex flex-col justify-center transition-colors duration-500 ease-in-out"
         style={{
           background: currentTheme.bgGradient,
         }}
       >
-        {/* Dynamic Background Mesh Pattern */}
+        {/* Dynamic Studio Grid Pattern */}
         <div
           ref={bgMeshRef}
-          className="absolute inset-0 opacity-[0.06] pointer-events-none will-change-transform"
+          className="absolute inset-0 opacity-[0.035] pointer-events-none will-change-transform"
           style={{
-            backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(rgba(0, 0, 0, 0.5) 1px, transparent 1px)`,
             backgroundSize: '40px 40px',
           }}
         />
 
-        {/* Ambient Color Glow Sphere */}
+        {/* Ambient Subtle Studio Glow */}
         <div
           ref={ambientGlowRef}
           className="absolute top-1/4 right-1/4 w-[650px] h-[650px] rounded-full blur-[140px] pointer-events-none will-change-transform transition-all duration-500"
@@ -181,37 +177,23 @@ export function Hero() {
           }}
         />
 
-        {/* Cinematic 3D Filament Spool Canvas Layer */}
-        <div className="absolute inset-0 z-10 pointer-events-none">
-          <FilamentSpoolCanvas
-            ref={spoolRef}
-            color={currentTheme.filamentHex}
-            finish={currentTheme.finish}
-            rimColor={currentTheme.accentColor}
-            scrollDriven
-            enableMouseParallax
-            className="w-full h-full"
-          />
-        </div>
-
         {/* Foreground Editorial Layer */}
-        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-20 sm:pt-24 lg:pt-28 pb-8 pointer-events-none">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[75vh]">
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-16 sm:pt-20 lg:pt-16 pb-4 pointer-events-none">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[55vh] lg:min-h-[60vh]">
             
             {/* Left Column Content Area */}
             <div className="lg:col-span-6 xl:col-span-7 relative flex flex-col justify-center">
               
-              {/* ACT 1: Hero Entry & Dialed-Coffee Style Presentation */}
+              {/* ACT 1: Hero Entry & Precision Industrial Presentation */}
               <div 
                 ref={introRef} 
                 className="w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
               >
-                {/* Dialed Coffee Style Massive Editorial Headline */}
-                <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-[5.2rem] font-extrabold uppercase leading-[0.92] tracking-tightest text-white drop-shadow-sm">
+                {/* Precision Industrial Headline */}
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.1rem] font-extrabold uppercase leading-[0.96] tracking-tightest text-[#111111]">
                   {currentTheme.headlineFirst} <br />
                   <span 
-                    className="transition-colors duration-300"
-                    style={{ color: currentTheme.accentLight }}
+                    className="transition-colors duration-300 text-[#5401C5]"
                   >
                     {currentTheme.headlineSecond}
                   </span>
@@ -219,23 +201,21 @@ export function Hero() {
 
                 {/* Subtitle / Product Description */}
                 <p 
-                  className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base lg:text-lg leading-relaxed transition-colors duration-300"
-                  style={{ color: currentTheme.textMuted }}
+                  className="mt-3 sm:mt-4 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] transition-colors duration-300"
                 >
                   {currentTheme.description}
                 </p>
 
-                {/* Interactive Dialed-Coffee Style Filament Color Switcher */}
-                <div className="mt-5 sm:mt-6 max-w-xl">
+                {/* Interactive Masterbatch Color Switcher */}
+                <div className="mt-3.5 sm:mt-4 max-w-xl">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] text-white/70">
+                    <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] text-[#696969]">
                       Select Masterbatch Color:
                     </span>
                     <span 
-                      className="text-xs font-semibold transition-colors duration-200"
-                      style={{ color: currentTheme.accentLight }}
+                      className="text-xs font-bold text-[#111111] transition-colors duration-200"
                     >
-                      {currentTheme.name} ({currentTheme.finish})
+                      {currentTheme.name} <span className="text-[#696969] font-normal">({currentTheme.finish})</span>
                     </span>
                   </div>
 
@@ -250,18 +230,18 @@ export function Hero() {
                           aria-label={`Switch to ${theme.name}`}
                           className={`group relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all duration-200 ${
                             isActive 
-                              ? 'scale-110 shadow-lg ring-2 ring-white ring-offset-2 ring-offset-transparent' 
-                              : 'hover:scale-105 opacity-80 hover:opacity-100'
+                              ? 'scale-110 shadow-md ring-2 ring-[#111111] ring-offset-2 ring-offset-white' 
+                              : 'hover:scale-105 opacity-85 hover:opacity-100'
                           }`}
                           style={{
                             backgroundColor: theme.filamentHex,
-                            borderColor: 'rgba(255, 255, 255, 0.4)',
-                            borderWidth: '2px',
+                            borderColor: '#E5E5E5',
+                            borderWidth: '1.5px',
                           }}
                         >
                           {isActive && (
                             <Check 
-                              className={`w-4 h-4 stroke-[3] ${
+                              className={`w-3.5 h-3.5 stroke-[3] ${
                                 theme.id === 'porcelain-white' ? 'text-black' : 'text-white'
                               }`} 
                             />
@@ -273,15 +253,11 @@ export function Hero() {
                   </div>
                 </div>
 
-                {/* Call-to-Action Buttons */}
-                <div className="mt-6 sm:mt-7 flex flex-wrap items-center gap-3 sm:gap-4">
+                {/* Call-to-Action Buttons — Primary is Black with White Typography */}
+                <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3 sm:gap-4">
                   <button
                     onClick={handleAddToCart}
-                    className="group inline-flex items-center justify-center gap-2.5 rounded-xl px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95 shadow-xl"
-                    style={{
-                      backgroundColor: currentTheme.buttonBg,
-                      color: currentTheme.buttonText,
-                    }}
+                    className="group inline-flex items-center justify-center gap-2.5 rounded-xl px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase transition-all duration-200 active:scale-95 shadow-md bg-[#111111] text-white hover:bg-[#252525]"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     <span>Add to Cart • {formatPrice(currentTheme.price, currency)}</span>
@@ -290,23 +266,23 @@ export function Hero() {
 
                   <Link
                     href={`/product/${currentTheme.productSlug}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl px-5 sm:px-6 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-200 hover:bg-white/20 active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl px-5 sm:px-6 py-3.5 sm:py-4 text-xs sm:text-sm font-bold tracking-wide uppercase border border-[#E5E5E5] bg-white text-[#111111] shadow-sm transition-all duration-200 hover:bg-[#F3F3F3] active:scale-95"
                   >
                     View Specs
                   </Link>
                 </div>
 
                 {/* Real Verified Specs Readouts */}
-                <div className="mt-6 sm:mt-8 grid max-w-lg grid-cols-3 gap-3 sm:gap-4 border-t border-white/15 pt-5">
+                <div className="mt-4 sm:mt-5 grid max-w-lg grid-cols-3 gap-3 sm:gap-4 border-t border-[#E5E5E5] pt-3.5">
                   {currentTheme.metrics.map((metric) => (
                     <div key={metric.label}>
                       <strong 
-                        className="font-mono text-lg sm:text-xl font-extrabold text-white block"
+                        className="font-mono text-lg sm:text-xl font-extrabold text-[#111111] block"
                       >
                         {metric.val}
                       </strong>
                       <span 
-                        className="mt-0.5 block text-[10px] sm:text-xs font-medium uppercase tracking-wider text-white/60"
+                        className="mt-0.5 block text-[10px] sm:text-xs font-medium uppercase tracking-wider text-[#696969]"
                       >
                         {metric.label}
                       </span>
@@ -321,60 +297,60 @@ export function Hero() {
                 className="pointer-events-none absolute inset-x-0 w-full opacity-0 will-change-[opacity,transform]"
               >
                 <div 
-                  className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white border border-white/20 bg-black/40 backdrop-blur-md"
+                  className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#111111] border border-[#E5E5E5] bg-white shadow-sm"
                 >
-                  <Activity className="h-3.5 w-3.5 text-emerald-400" />
+                  <Activity className="h-3.5 w-3.5 text-emerald-600" />
                   Dual-Axis Laser Metrology
                 </div>
 
-                <h2 className="max-w-xl text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase leading-[0.98] tracking-tightest text-white">
+                <h2 className="max-w-xl text-3xl sm:text-5xl lg:text-6xl font-extrabold uppercase leading-[0.98] tracking-tightest text-[#111111]">
                   Round Strand. <br />
-                  <span style={{ color: currentTheme.accentLight }}>
+                  <span className="text-[#5401C5]">
                     Calibrated 4.2N Tension.
                   </span>
                 </h2>
 
                 <p 
-                  className="mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-white/80"
+                  className="mt-4 max-w-lg text-sm sm:text-base leading-relaxed text-[#696969]"
                 >
                   Every layer is wound side-by-side with computer-controlled geometric pitch. Orbiting the spool reveals its transparent smoked flanges, structural cutouts, and dense, snag-free core windings.
                 </p>
 
                 {/* Live Laser Micrometer HUD Card */}
-                <div className="mt-6 p-5 sm:p-6 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-2xl max-w-lg space-y-3.5 pointer-events-auto">
-                  <div className="flex items-center justify-between text-xs border-b border-white/10 pb-3">
-                    <span className="font-mono uppercase font-bold text-white/80 flex items-center gap-2 text-[11px]">
+                <div className="mt-6 p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-xl max-w-lg space-y-3.5 pointer-events-auto">
+                  <div className="flex items-center justify-between text-xs border-b border-[#E5E5E5] pb-3">
+                    <span className="font-mono uppercase font-bold text-[#252525] flex items-center gap-2 text-[11px]">
                       <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                       </span>
                       Optical Laser Micrometer: Online
                     </span>
-                    <span className="font-mono text-emerald-400 font-bold text-xs">
+                    <span className="font-mono text-emerald-600 font-bold text-xs">
                       ±0.018 mm (PASS)
                     </span>
                   </div>
 
                   <div className="flex items-baseline justify-between pt-1">
                     <div>
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-white/60 block">
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-[#696969] block">
                         Real-Time Diameter
                       </span>
                       <div className="flex items-baseline gap-1 mt-0.5">
-                        <span ref={liveGaugeRef} className="font-mono text-3xl sm:text-4xl font-extrabold text-white">
+                        <span ref={liveGaugeRef} className="font-mono text-3xl sm:text-4xl font-extrabold text-[#111111]">
                           1.750
                         </span>
-                        <span className="font-mono text-sm font-bold text-emerald-400">
+                        <span className="font-mono text-sm font-bold text-emerald-600">
                           mm
                         </span>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-white/60 block">
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-[#696969] block">
                         Circularity Ratio
                       </span>
-                      <span className="font-mono text-sm sm:text-base font-bold text-white mt-1 block">
+                      <span className="font-mono text-sm sm:text-base font-bold text-[#111111] mt-1 block">
                         99.4% Roundness
                       </span>
                     </div>
@@ -384,14 +360,14 @@ export function Hero() {
                 <div className="mt-6 flex items-center gap-4 pointer-events-auto">
                   <Link
                     href="/shop"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-white/90 transition-all shadow-lg active:scale-95"
+                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#111111] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#252525] transition-all shadow-md active:scale-95"
                   >
                     <span>Shop Precision Spools</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                   <Link
                     href="/colors"
-                    className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white/10 border border-white/20 text-white font-bold text-xs uppercase tracking-wider hover:bg-white/20 transition-all backdrop-blur-md"
+                    className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-white border border-[#E5E5E5] text-[#111111] font-bold text-xs uppercase tracking-wider hover:bg-[#F3F3F3] transition-all shadow-sm"
                   >
                     All Masterbatches
                   </Link>
@@ -409,43 +385,41 @@ export function Hero() {
           ref={climaxRef}
           className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center opacity-0 will-change-[opacity,transform] z-20 px-5 sm:px-8 max-w-5xl mx-auto"
         >
-          {/* Status Pill with Animated Glowing Pulse */}
-          <div className="mb-4 sm:mb-6 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.22em] text-white border border-white/25 bg-black/60 backdrop-blur-xl shadow-[0_0_24px_rgba(98,88,245,0.45)]">
+          {/* Status Pill */}
+          <div className="mb-4 sm:mb-6 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.22em] text-[#111111] border border-[#E5E5E5] bg-white/95 backdrop-blur-xl shadow-md">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6258F5] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6258F5]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5401C5] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5401C5]"></span>
             </span>
             <span>Aperture Metrology • 100% Monofilament Purity</span>
           </div>
 
           {/* Massive Editorial Headline */}
-          <h2 className="max-w-4xl text-3xl sm:text-5xl lg:text-7xl font-extrabold uppercase leading-[0.92] tracking-tightest text-white drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
+          <h2 className="max-w-4xl text-3xl sm:text-5xl lg:text-7xl font-extrabold uppercase leading-[0.92] tracking-tightest text-[#111111]">
             Perfection In <br />
-            <span 
-              className="bg-gradient-to-r from-white via-[#C7C2FA] to-[#6258F5] bg-clip-text text-transparent"
-            >
+            <span className="text-[#5401C5]">
               Every Single Layer.
             </span>
           </h2>
 
           {/* Editorial Subtitle */}
-          <p className="mt-4 sm:mt-5 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-white/80 font-medium drop-shadow-md">
+          <p className="mt-4 sm:mt-5 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] font-medium">
             Side-by-side computer-wound pitch eliminates tangles at high speeds. Calibrated 4.2N tension ensures smooth, continuous extrusion through every print hour.
           </p>
 
-          {/* Three Glassmorphic Telemetry Cards */}
+          {/* Three Pure White Telemetry Cards */}
           <div className="mt-6 sm:mt-8 grid grid-cols-3 gap-3 sm:gap-4 max-w-lg w-full">
-            <div className="p-3 sm:p-4 rounded-2xl bg-black/50 backdrop-blur-xl border border-white/20 shadow-xl">
-              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-white/60 block">Tolerance</span>
-              <strong className="font-mono text-base sm:text-xl font-extrabold text-white block mt-0.5">±0.018 mm</strong>
+            <div className="p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
+              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Tolerance</span>
+              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#111111] block mt-0.5">±0.018 mm</strong>
             </div>
-            <div className="p-3 sm:p-4 rounded-2xl bg-black/50 backdrop-blur-xl border border-white/20 shadow-xl">
-              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-white/60 block">Roundness</span>
-              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#C7C2FA] block mt-0.5">99.8%</strong>
+            <div className="p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
+              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Roundness</span>
+              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#5401C5] block mt-0.5">99.8%</strong>
             </div>
-            <div className="p-3 sm:p-4 rounded-2xl bg-black/50 backdrop-blur-xl border border-white/20 shadow-xl">
-              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-white/60 block">Winding</span>
-              <strong className="font-mono text-base sm:text-xl font-extrabold text-white block mt-0.5">Snag-Free</strong>
+            <div className="p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
+              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Winding</span>
+              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#111111] block mt-0.5">Snag-Free</strong>
             </div>
           </div>
 
@@ -453,7 +427,7 @@ export function Hero() {
           <div className="mt-6 sm:mt-8 pointer-events-auto">
             <a
               href="#color-studio"
-              className="group inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-[#6258F5] to-[#7B72F8] text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(98,88,245,0.5)] border border-white/25"
+              className="group inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-[#111111] text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 hover:bg-[#252525] active:scale-95 shadow-md"
             >
               <span>Explore Masterbatch Science</span>
               <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-1" />
@@ -464,12 +438,12 @@ export function Hero() {
         {/* Minimal Scroll Prompt Indicator */}
         <div
           ref={indicatorRef}
-          className="pointer-events-none absolute bottom-4 sm:bottom-5 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 text-white/70 will-change-[opacity]"
+          className="pointer-events-none absolute bottom-4 sm:bottom-5 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-1.5 text-[#696969] will-change-[opacity]"
         >
           <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.22em]">
-            Scroll to rotate spool in 3D
+            Scroll to inspect spool in 3D
           </span>
-          <ChevronDown className="h-4 w-4 animate-bounce text-white" />
+          <ChevronDown className="h-4 w-4 animate-bounce text-[#111111]" />
         </div>
       </div>
     </section>

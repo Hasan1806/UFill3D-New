@@ -5,46 +5,56 @@
 @tailwind utilities;
 
 :root {
-  --ufill-primary: #11152E;
-  --ufill-secondary: #6258F5;
-  --ufill-tertiary: #E9E8FF;
-  --ufill-background: #F8F9FC;
-  --ufill-text: #11152E;
+  /* Official Locked UFill3D Palette */
+  --ufill-primary: #111111;         /* Deep Charcoal Black */
+  --ufill-secondary: #5401C5;       /* Original Royal Violet brand accent */
+  --ufill-tertiary: #EEEAF5;        /* Subtle tinted mist surface */
+  --ufill-background: #FAFAFA;      /* Body Canvas Off-White */
+  --ufill-text: #252525;            /* Body Text Deep Slate */
+  --ufill-border: #E5E5E5;          /* Delicate Structural Rule */
+  --ufill-surface: #FFFFFF;         /* Pure White Surface */
+  --ufill-surface-soft: #F3F3F3;    /* Soft Surface Neutral */
+  --ufill-surface-dark: #181818;    /* Dark Surface Technical */
+  --ufill-muted: #696969;           /* Muted Text */
 }
 
 html {
   background-color: var(--ufill-background);
   color: var(--ufill-text);
-  font-family: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   overflow-x: hidden;
-  background-color: #F8F9FC;
-  color: #11152E;
-  font-family: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #FAFAFA;
+  color: #252525;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Custom modern scrollbar */
+h1, h2, h3, h4, h5, h6, p, span, a, button, input, label {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Custom modern industrial scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F0F2F8;
+  background: #F3F3F3;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #C4C9DC;
+  background: #D1D5DB;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6258F5;
+  background: #5401C5;
 }
 
 /* Utilities */
@@ -56,10 +66,10 @@ body {
   scrollbar-width: none;
 }
 
-/* Text selections */
+/* Text selections — Royal Violet on tinted mist */
 ::selection {
-  background-color: #6258F5;
-  color: #FFFFFF;
+  background-color: #EEEAF5;
+  color: #5401C5;
 }
 
 @media (prefers-reduced-motion: reduce) {

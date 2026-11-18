@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
 import { formatPrice } from '@/lib/currency';
@@ -15,14 +14,10 @@ import {
   Sparkles,
   Layers,
   ShieldCheck,
-  Zap
+  Zap,
+  Activity
 } from 'lucide-react';
-import { SpoolCanvasHandle } from '@/components/3d/FilamentSpoolCanvas';
-
-const FilamentSpoolCanvas = dynamic(
-  () => import('@/components/3d/FilamentSpoolCanvas').then((mod) => mod.FilamentSpoolCanvas),
-  { ssr: false, loading: () => <div className="h-full w-full animate-pulse rounded-3xl bg-white/5" /> }
-);
+import { useSpoolJourneyStore } from '@/lib/spool-journey-store';
 
 interface ExplorerColor {
   name: string;
@@ -39,13 +34,13 @@ export function ColorExplorer() {
   const allColors: ExplorerColor[] = [
     {
       name: 'Electric Periwinkle',
-      hex: '#6258F5',
+      hex: '#5401C5',
       finish: 'Silk',
       pantone: 'PANTONE 2685 C (Signature)',
       category: 'Signature',
-      description: 'Our flagship tone. A vibrant, iridescent periwinkle designed to catch dynamic specular highlights.',
+      description: 'Our flagship tone. A vibrant, iridescent royal violet-periwinkle designed to catch dynamic specular highlights.',
       temp: '205 - 225 °C',
-      accentBg: '#1C1754',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Crimson Velocity',
@@ -55,7 +50,7 @@ export function ColorExplorer() {
       category: 'Vivid',
       description: 'Race-bred saturated red formulated with heat-stable automotive organic dyes. Zero thermal fading.',
       temp: '210 - 235 °C',
-      accentBg: '#450A0E',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Cyber Cyan',
@@ -65,7 +60,7 @@ export function ColorExplorer() {
       category: 'Vivid',
       description: 'Electric neon cyan tuned for high-contrast prototypes, drone canopies, and tech enclosures.',
       temp: '205 - 225 °C',
-      accentBg: '#082D3D',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Hyper Lime',
@@ -75,7 +70,7 @@ export function ColorExplorer() {
       category: 'Vivid',
       description: 'High-visibility safety and recreational filament with pearlescent light deflection.',
       temp: '205 - 230 °C',
-      accentBg: '#1B2C08',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Blaze Orange',
@@ -85,27 +80,27 @@ export function ColorExplorer() {
       category: 'Vivid',
       description: 'Industrial safety orange formulated for factory tooling, jigs, and high-vibration drone frames.',
       temp: '210 - 235 °C',
-      accentBg: '#441605',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Forged Carbon Black',
-      hex: '#18191D',
+      hex: '#181818',
       finish: 'Matte',
       pantone: 'PANTONE Black 7 C (Stealth)',
       category: 'Engineering',
       description: 'Textured micro-matte surface infused with carbon optics that effortlessly conceals layer lines.',
       temp: '215 - 245 °C',
-      accentBg: '#0E1017',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Porcelain White',
-      hex: '#F8F9FC',
+      hex: '#F3F3F3',
       finish: 'Matte',
       pantone: 'PANTONE Bright White (100% Opacity)',
       category: 'Neutral',
       description: 'Pure titanium-dioxide white pigment with 100% opacity for flawless architectural models.',
       temp: '200 - 220 °C',
-      accentBg: '#151D2D',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Soft Lavender',
@@ -115,7 +110,7 @@ export function ColorExplorer() {
       category: 'Signature',
       description: 'Delicate pastel purple with a silky sheen. Ideal for organic vases and interior aesthetics.',
       temp: '200 - 220 °C',
-      accentBg: '#231B4D',
+      accentBg: '#FAFAFA',
     },
     {
       name: 'Midnight Navy',
@@ -125,7 +120,7 @@ export function ColorExplorer() {
       category: 'Neutral',
       description: 'Deep, authoritatively dark navy with a velvety matte surface that absorbs ambient reflections.',
       temp: '205 - 225 °C',
-      accentBg: '#0A0E22',
+      accentBg: '#FAFAFA',
     },
   ];
 
@@ -134,7 +129,6 @@ export function ColorExplorer() {
   const [selectedWeight, setSelectedWeight] = useState<'1.0 kg' | '3.0 kg'>('1.0 kg');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [addedAnimation, setAddedAnimation] = useState(false);
-  const spoolRef = useRef<SpoolCanvasHandle>(null);
 
   const addItem = useCartStore((state) => state.addItem);
   const currency = useCartStore((state) => state.currency);
@@ -145,7 +139,7 @@ export function ColorExplorer() {
 
   const handleSelectColor = (color: ExplorerColor) => {
     setSelectedColor(color);
-    spoolRef.current?.triggerColorSwitch(color.hex, color.finish, color.hex);
+    useSpoolJourneyStore.getState().setColor(color.hex, color.finish, color.hex);
   };
 
   const handleAddToCart = () => {
@@ -170,39 +164,30 @@ export function ColorExplorer() {
   return (
     <section 
       id="color-studio"
-      className="relative overflow-hidden py-24 sm:py-32 transition-colors duration-700 ease-in-out border-b border-white/10"
-      style={{ backgroundColor: selectedColor.accentBg }}
+      className="relative overflow-hidden py-24 sm:py-32 bg-[#FAFAFA] text-[#252525] border-b border-[#E5E5E5]"
     >
-      {/* Dynamic Background Glow */}
+      {/* Studio Ambient Illumination */}
       <div 
-        className="absolute top-1/3 left-1/4 w-[700px] h-[700px] rounded-full blur-[160px] opacity-35 pointer-events-none transition-colors duration-700"
+        className="absolute top-1/3 left-1/4 w-[700px] h-[700px] rounded-full blur-[180px] opacity-15 pointer-events-none transition-colors duration-700"
         style={{ backgroundColor: selectedColor.hex }}
-      />
-
-      {/* Atmospheric Luminous Light Bridge from Hero Transition */}
-      <div 
-        className="absolute inset-x-0 top-0 h-44 pointer-events-none z-10"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(248, 249, 252, 0.12), transparent)',
-        }}
       />
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
         {/* Editorial Section Heading */}
         <div className="max-w-3xl mb-14 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold uppercase tracking-[0.2em] border border-white/20">
-            <Palette className="w-3.5 h-3.5 text-white" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white text-[#111111] text-xs font-bold uppercase tracking-[0.2em] border border-[#E5E5E5] shadow-sm">
+            <Palette className="w-3.5 h-3.5 text-[#5401C5]" />
             <span>Section 02 • Masterbatch Color Science</span>
           </div>
 
-          <h2 className="text-4xl sm:text-6xl font-extrabold uppercase leading-[0.92] tracking-tightest text-white">
+          <h2 className="text-4xl sm:text-6xl font-extrabold uppercase leading-[0.92] tracking-tightest text-[#111111]">
             A Spectrum of <br />
-            <span style={{ color: selectedColor.hex === '#18191D' || selectedColor.hex === '#11152E' ? '#94A3B8' : selectedColor.hex }}>
+            <span className="text-[#5401C5]">
               Industrial Precision.
             </span>
           </h2>
 
-          <p className="text-sm sm:text-base lg:text-lg text-white/80 max-w-2xl leading-relaxed">
+          <p className="text-sm sm:text-base lg:text-lg text-[#696969] max-w-2xl leading-relaxed">
             Every masterbatch formulation is synthesized with automotive-grade organic dyes and inorganic mineral pigments. Monitored for Delta-E &lt; 0.5 to ensure zero color deviation between production lots.
           </p>
 
@@ -214,8 +199,8 @@ export function ColorExplorer() {
                 onClick={() => setActiveCategory(cat)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                   activeCategory === cat
-                    ? 'bg-white text-black shadow-lg scale-105'
-                    : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/20 border border-white/15'
+                    ? 'bg-[#111111] text-white shadow-sm scale-105'
+                    : 'bg-white text-[#696969] hover:text-[#111111] hover:bg-[#F3F3F3] border border-[#E5E5E5]'
                 }`}
               >
                 {cat}
@@ -227,56 +212,68 @@ export function ColorExplorer() {
         {/* 3D Spool Studio & Control Suite */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           
-          {/* Left Column: Interactive 3D Spool Viewport */}
+          {/* Left Column: Polymer Spectrophotometer & Colorimetry Metrology Card */}
           <div className="lg:col-span-7 relative">
-            <div className="relative aspect-square max-w-[560px] mx-auto rounded-3xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden">
+            <div className="relative aspect-square max-w-[560px] mx-auto rounded-3xl bg-white border border-[#E5E5E5] shadow-xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden">
               
-              {/* Header Badges on 3D Canvas */}
+              {/* Header Badges */}
               <div className="flex items-center justify-between z-20">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-mono text-white">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F3F3F3] border border-[#E5E5E5] text-xs font-mono text-[#111111]">
                   <span
-                    className="w-3 h-3 rounded-full border border-white/30"
+                    className="w-3.5 h-3.5 rounded-full border border-black/10 transition-colors duration-300 shadow-sm"
                     style={{ backgroundColor: selectedColor.hex }}
                   />
                   <span className="font-bold">{selectedColor.name}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-[11px] font-mono text-white/70 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20">
-                  <Rotate3d className="w-3.5 h-3.5 text-white" />
-                  <span>360° Drag & Inspect</span>
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#696969] bg-[#F3F3F3] px-3 py-1.5 rounded-full border border-[#E5E5E5]">
+                  <Activity className="w-3.5 h-3.5 text-[#5401C5] animate-pulse" />
+                  <span>3D Spool Synchronized</span>
                 </div>
               </div>
 
-              {/* 3D Spool Canvas */}
-              <div className="w-full h-full my-auto">
-                <FilamentSpoolCanvas
-                  ref={spoolRef}
-                  color={selectedColor.hex}
-                  finish={selectedColor.finish}
-                  rimColor={selectedColor.hex}
-                  interactive={true}
-                  scale={1.3}
-                  rotationX={0.24}
-                  rotationY={-0.5}
-                  autoRotateSpeed={0.003}
-                />
+              {/* Central Spectrophotometer Reflectance Curve & Colorimetry Visualizer */}
+              <div className="w-full my-auto py-6 flex flex-col items-center justify-center text-center">
+                {/* Visualizer Orb & Glow */}
+                <div 
+                  className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl border-4 border-white"
+                  style={{ backgroundColor: selectedColor.hex }}
+                >
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-black/20 via-transparent to-white/40 pointer-events-none" />
+                  <div className="w-14 h-14 rounded-full bg-white/95 backdrop-blur-md shadow-lg flex flex-col items-center justify-center">
+                    <span className="text-[9px] font-mono text-[#696969] uppercase font-bold tracking-tight">Delta-E</span>
+                    <span className="text-xs font-mono font-extrabold text-[#111111]">&lt;0.38</span>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-1">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#EEEAF5] text-[#5401C5] text-[11px] font-mono font-bold uppercase tracking-wider">
+                    Spectrophotometer Verified • Automotive Organic Grade
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-[#111111]">
+                    {selectedColor.name} Masterbatch
+                  </h3>
+                  <p className="text-xs text-[#696969] max-w-sm mx-auto">
+                    {selectedColor.description}
+                  </p>
+                </div>
               </div>
 
-              {/* Footer info inside canvas box */}
-              <div className="flex items-center justify-between pt-4 border-t border-white/15 z-20 text-xs">
+              {/* Footer info inside metrology card */}
+              <div className="flex items-center justify-between pt-4 border-t border-[#E5E5E5] z-20 text-xs">
                 <div className="flex items-center gap-5">
                   <div>
-                    <span className="text-white/60 block text-[10px] uppercase font-mono tracking-wider">Finish</span>
-                    <span className="font-bold text-white">{selectedColor.finish} Sheen</span>
+                    <span className="text-[#696969] block text-[10px] uppercase font-mono tracking-wider">Finish</span>
+                    <span className="font-bold text-[#111111]">{selectedColor.finish} Sheen</span>
                   </div>
                   <div>
-                    <span className="text-white/60 block text-[10px] uppercase font-mono tracking-wider">Pantone Standard</span>
-                    <span className="font-mono font-bold text-white">{selectedColor.pantone.split('(')[0]}</span>
+                    <span className="text-[#696969] block text-[10px] uppercase font-mono tracking-wider">Pantone Standard</span>
+                    <span className="font-mono font-bold text-[#111111]">{selectedColor.pantone.split('(')[0]}</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-white/60 block text-[10px] uppercase font-mono tracking-wider">Nozzle Window</span>
-                  <span className="text-emerald-400 font-bold font-mono">
+                  <span className="text-[#696969] block text-[10px] uppercase font-mono tracking-wider">Nozzle Window</span>
+                  <span className="text-emerald-600 font-bold font-mono">
                     {selectedColor.temp}
                   </span>
                 </div>
@@ -288,12 +285,12 @@ export function ColorExplorer() {
           <div className="lg:col-span-5 space-y-6">
             
             {/* Color Swatches Grid */}
-            <div className="p-6 sm:p-7 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-2xl space-y-5">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#E5E5E5] shadow-xl space-y-5">
               <div>
-                <h3 className="text-base sm:text-lg font-bold uppercase tracking-wider text-white">
+                <h3 className="text-base sm:text-lg font-bold uppercase tracking-wider text-[#111111]">
                   Available Formulations
                 </h3>
-                <p className="text-xs text-white/70 mt-1">
+                <p className="text-xs text-[#696969] mt-1">
                   Click any swatch to load into the 3D inspection viewport
                 </p>
               </div>
@@ -308,21 +305,21 @@ export function ColorExplorer() {
                       aria-label={`Select ${color.name}`}
                       className={`group relative flex flex-col items-center p-2 rounded-2xl border transition-all duration-200 ${
                         isSelected
-                          ? 'border-white bg-white/20 shadow-lg scale-105'
-                          : 'border-white/10 hover:border-white/30 bg-white/5'
+                          ? 'border-[#111111] bg-[#F3F3F3] shadow-md scale-105'
+                          : 'border-[#E5E5E5] hover:border-[#111111]/30 bg-white'
                       }`}
                     >
                       <div
-                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl relative shadow-md border border-white/30 flex items-center justify-center transition-transform group-hover:scale-105"
+                        className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl relative shadow-sm border border-black/10 flex items-center justify-center transition-transform group-hover:scale-105"
                         style={{ backgroundColor: color.hex }}
                       >
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                          <div className="w-5 h-5 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-sm">
                             <Check className="w-3.5 h-3.5 text-black stroke-[3]" />
                           </div>
                         )}
                       </div>
-                      <span className="text-[10px] font-bold text-white mt-1.5 text-center line-clamp-1">
+                      <span className="text-[10px] font-bold text-[#111111] mt-1.5 text-center line-clamp-1">
                         {color.name}
                       </span>
                     </button>
@@ -331,28 +328,28 @@ export function ColorExplorer() {
               </div>
 
               {/* Formulation Description */}
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-white/80 leading-relaxed">
-                <strong className="text-white">{selectedColor.name}: </strong>
+              <div className="p-3.5 rounded-2xl bg-[#F3F3F3] border border-[#E5E5E5] text-xs text-[#252525] leading-relaxed">
+                <strong className="text-[#111111]">{selectedColor.name}: </strong>
                 {selectedColor.description}
               </div>
             </div>
 
             {/* Diameter, Weight & Direct Checkout Card */}
-            <div className="p-6 sm:p-7 rounded-3xl bg-black/40 backdrop-blur-xl border border-white/15 shadow-2xl space-y-5">
+            <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#E5E5E5] shadow-xl space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/60 block mb-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#696969] block mb-1.5">
                     Extrusion Gauge
                   </label>
-                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-white/10 rounded-xl border border-white/15 text-xs font-bold">
+                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F3F3F3] rounded-xl border border-[#E5E5E5] text-xs font-bold">
                     {(['1.75 mm', '2.85 mm'] as const).map((d) => (
                       <button
                         key={d}
                         onClick={() => setSelectedDiameter(d)}
                         className={`py-2 rounded-lg transition-all ${
                           selectedDiameter === d
-                            ? 'bg-white text-black shadow-sm'
-                            : 'text-white/70 hover:text-white'
+                            ? 'bg-[#111111] text-white shadow-sm'
+                            : 'text-[#696969] hover:text-[#111111]'
                         }`}
                       >
                         {d}
@@ -362,18 +359,18 @@ export function ColorExplorer() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-white/60 block mb-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#696969] block mb-1.5">
                     Spool Net Mass
                   </label>
-                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-white/10 rounded-xl border border-white/15 text-xs font-bold">
+                  <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F3F3F3] rounded-xl border border-[#E5E5E5] text-xs font-bold">
                     {(['1.0 kg', '3.0 kg'] as const).map((w) => (
                       <button
                         key={w}
                         onClick={() => setSelectedWeight(w)}
                         className={`py-2 rounded-lg transition-all ${
                           selectedWeight === w
-                            ? 'bg-white text-black shadow-sm'
-                            : 'text-white/70 hover:text-white'
+                            ? 'bg-[#111111] text-white shadow-sm'
+                            : 'text-[#696969] hover:text-[#111111]'
                         }`}
                       >
                         {w}
@@ -383,18 +380,18 @@ export function ColorExplorer() {
                 </div>
               </div>
 
-              {/* Price & Add to Cart */}
+              {/* Price & Add to Cart — Black Button with White Typography */}
               <div className="pt-2 flex items-center justify-between gap-4">
                 <div>
-                  <span className="text-[10px] uppercase font-mono text-white/60 block">Price</span>
-                  <div className="text-2xl font-extrabold text-white font-mono">
+                  <span className="text-[10px] uppercase font-mono text-[#696969] block">Price</span>
+                  <div className="text-2xl font-extrabold text-[#111111] font-mono">
                     {formatPrice(selectedWeight === '3.0 kg' ? 69.99 : 24.99, currency)}
                   </div>
                 </div>
 
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-white text-black font-extrabold uppercase tracking-wider text-xs hover:bg-white/90 shadow-xl transition-all active:scale-95 group"
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-[#111111] text-white font-extrabold uppercase tracking-wider text-xs hover:bg-[#252525] shadow-md transition-all active:scale-95 group"
                 >
                   <ShoppingBag className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
                   <span>{addedAnimation ? 'Added to Cart!' : 'Add Spool to Cart'}</span>

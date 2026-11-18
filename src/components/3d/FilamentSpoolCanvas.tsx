@@ -29,6 +29,7 @@ if (typeof window !== 'undefined') {
 
 export interface SpoolCanvasHandle {
   setProgress: (progress: number) => void;
+  setJourneyProgress: (journeyProgress: number) => void;
   triggerColorSwitch: (newColor: string, finish?: 'Matte' | 'Silk' | 'Gloss' | 'Translucent', rimHex?: string) => void;
   triggerEntrance: () => void;
 }
@@ -52,31 +53,105 @@ interface SpoolCanvasProps {
 
 // Snappy, Fluid 3D Timeline Keyframes (Reference 3D4Makers Choreography)
 const CINEMATIC_TIMELINE_KEYFRAMES = [
-  // 0% - 15%: Opening hero composition
-  { progress: 0.00, rotX: 0.18,  rotY: -0.42, rotZ: 0.05, posX: 1.45, posY: 0.00,  posZ: 0.00, scale: 1.08, fov: 38.0, orbitAngle: 0.00, dollyZ: 0.00 },
-  { progress: 0.15, rotX: -0.06, rotY: 0.18,  rotZ: 0.30, posX: 1.25, posY: -0.04, posZ: 0.15, scale: 1.12, fov: 38.0, orbitAngle: 0.06, dollyZ: 0.08 },
+  // 0% - 15%: Opening hero composition — beautifully balanced on right side, zero clipping
+  { progress: 0.00, rotX: 0.16,  rotY: -0.42, rotZ: 0.05, posX: 0.90, posY: -0.05, posZ: 0.00, scale: 0.88, fov: 38.0, orbitAngle: 0.00, dollyZ: 0.00 },
+  { progress: 0.15, rotX: -0.06, rotY: 0.18,  rotZ: 0.30, posX: 0.80, posY: -0.08, posZ: 0.15, scale: 0.92, fov: 38.0, orbitAngle: 0.06, dollyZ: 0.08 },
   
   // 15% - 35%: First 3D rotation revealing transparent flange & core
-  { progress: 0.35, rotX: -0.20, rotY: 0.65,  rotZ: 0.90, posX: 0.75, posY: -0.06, posZ: 0.40, scale: 1.20, fov: 37.8, orbitAngle: 0.16, dollyZ: 0.20 },
+  { progress: 0.35, rotX: -0.20, rotY: 0.65,  rotZ: 0.90, posX: 0.50, posY: -0.08, posZ: 0.40, scale: 1.02, fov: 37.8, orbitAngle: 0.16, dollyZ: 0.20 },
 
   // 35% - 60%: Three-quarter product reveal (wound core & cutout windows)
-  { progress: 0.60, rotX: 0.25,  rotY: 1.25,  rotZ: 1.60, posX: 0.20, posY: 0.04,  posZ: 0.65, scale: 1.25, fov: 37.5, orbitAngle: 0.28, dollyZ: 0.32 },
+  { progress: 0.60, rotX: 0.25,  rotY: 1.25,  rotZ: 1.60, posX: 0.15, posY: 0.02,  posZ: 0.65, scale: 1.15, fov: 37.5, orbitAngle: 0.28, dollyZ: 0.32 },
 
   // 60% - 72%: Controlled final approach (re-centering and rotating toward front-on alignment)
-  { progress: 0.72, rotX: 0.08,  rotY: 2.70,  rotZ: 2.85, posX: 0.05, posY: 0.00,  posZ: 0.75, scale: 1.28, fov: 37.2, orbitAngle: 0.10, dollyZ: 0.38 },
+  { progress: 0.72, rotX: 0.08,  rotY: 2.70,  rotZ: 2.85, posX: 0.00, posY: 0.00,  posZ: 0.75, scale: 1.25, fov: 37.2, orbitAngle: 0.10, dollyZ: 0.38 },
 
   // 72% - 82%: State A -> State B (Detailed reel, dark mechanical center, circumference emission awakens)
-  { progress: 0.82, rotX: 0.04,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 0.88, scale: 1.36, fov: 37.0, orbitAngle: 0.00, dollyZ: 0.46 },
+  { progress: 0.82, rotX: 0.04,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 0.88, scale: 1.34, fov: 37.0, orbitAngle: 0.00, dollyZ: 0.46 },
 
   // 82% - 90%: State B -> State C (Winding illumination & 3D diffusion expand, camera dollies forward)
-  { progress: 0.90, rotX: 0.02,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.25, scale: 1.52, fov: 36.8, orbitAngle: 0.00, dollyZ: 0.68 },
+  { progress: 0.90, rotX: 0.02,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.25, scale: 1.50, fov: 36.8, orbitAngle: 0.00, dollyZ: 0.68 },
 
   // 90% - 96%: State C -> State D (Broad luminous close-up, concentric windings fill composition, light spreads)
-  { progress: 0.96, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.70, scale: 1.78, fov: 36.5, orbitAngle: 0.00, dollyZ: 0.95 },
+  { progress: 0.96, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.70, scale: 1.75, fov: 36.5, orbitAngle: 0.00, dollyZ: 0.95 },
 
   // 96% - 100%: State D -> State E (Radial light takeover expands to full frame, revealing next section)
   { progress: 1.00, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 2.05, scale: 2.05, fov: 36.0, orbitAngle: 0.00, dollyZ: 1.20 },
 ];
+
+// ---------------------------------------------------------------------------
+// CONTINUOUS HOMEPAGE 3D SPOOL JOURNEY (HERO -> FOOTER CATMULL-ROM SPLINE)
+// ---------------------------------------------------------------------------
+const JOURNEY_WAYPOINTS = [
+  new THREE.Vector3(1.10, 0.12, 0.00),   // 0.00: Exit Hero / Upper Right Float
+  new THREE.Vector3(1.05, 0.04, 0.04),   // 0.15: Color Studio (Upper Right Safe Area)
+  new THREE.Vector3(0.65, -0.02, 0.08),  // 0.35: Moving to Center-Right
+  new THREE.Vector3(0.20, -0.06, 0.06),  // 0.50: Engineering Metrology & Quality (Center-Right)
+  new THREE.Vector3(-0.45, 0.00, 0.04),  // 0.65: Materials Showcase (Center-Left)
+  new THREE.Vector3(-0.95, -0.08, 0.02), // 0.80: Products Catalog (Left Gutter)
+  new THREE.Vector3(-1.18, -0.35, 0.00), // 0.88: Section 6 (Descending into Lower Left)
+  new THREE.Vector3(-1.65, -0.80, -0.15), // 0.95: Approaching Footer (Sweeping toward Extreme Lower Left)
+  new THREE.Vector3(-2.15, -1.30, -0.40), // 1.00: Extreme Bottom Left Corner Horizon & Disappear
+];
+
+const journeyCurve = new THREE.CatmullRomCurve3(JOURNEY_WAYPOINTS, false, 'centripetal');
+
+const JOURNEY_ROT_KEYS = [
+  { t: 0.00, rotX: 0.04,  rotY: Math.PI * 1.05, rotZ: Math.PI },
+  { t: 0.15, rotX: 0.14,  rotY: Math.PI * 1.25, rotZ: 0.15 },
+  { t: 0.35, rotX: 0.18,  rotY: Math.PI * 1.55, rotZ: 0.10 },
+  { t: 0.50, rotX: 0.22,  rotY: Math.PI * 1.85, rotZ: -0.05 },
+  { t: 0.65, rotX: -0.10, rotY: Math.PI * 2.20, rotZ: 0.18 },
+  { t: 0.80, rotX: 0.12,  rotY: Math.PI * 2.60, rotZ: 0.08 },
+  { t: 0.88, rotX: 0.18,  rotY: Math.PI * 3.10, rotZ: 0.04 },
+  { t: 0.95, rotX: 0.24,  rotY: Math.PI * 3.65, rotZ: 0.10 },
+  { t: 1.00, rotX: 0.30,  rotY: Math.PI * 4.20, rotZ: 0.18 },
+];
+
+const JOURNEY_SCALE_KEYS = [
+  { t: 0.00, scale: 0.42 },
+  { t: 0.15, scale: 0.40 },
+  { t: 0.35, scale: 0.42 },
+  { t: 0.50, scale: 0.44 },
+  { t: 0.65, scale: 0.42 },
+  { t: 0.80, scale: 0.38 },
+  { t: 0.88, scale: 0.32 },
+  { t: 0.95, scale: 0.16 },
+  { t: 1.00, scale: 0.00 }, // Complete scale vanishing at extreme bottom left
+];
+
+const interpolateJourneyRot = (t: number) => {
+  const clamped = Math.min(1, Math.max(0, t));
+  for (let i = 0; i < JOURNEY_ROT_KEYS.length - 1; i++) {
+    const k1 = JOURNEY_ROT_KEYS[i];
+    const k2 = JOURNEY_ROT_KEYS[i + 1];
+    if (clamped >= k1.t && clamped <= k2.t) {
+      const segT = (clamped - k1.t) / (k2.t - k1.t);
+      const ease = 0.5 - 0.5 * Math.cos(segT * Math.PI);
+      return {
+        rotX: k1.rotX + (k2.rotX - k1.rotX) * ease,
+        rotY: k1.rotY + (k2.rotY - k1.rotY) * ease,
+        rotZ: k1.rotZ + (k2.rotZ - k1.rotZ) * ease,
+      };
+    }
+  }
+  const last = JOURNEY_ROT_KEYS[JOURNEY_ROT_KEYS.length - 1];
+  return { rotX: last.rotX, rotY: last.rotY, rotZ: last.rotZ };
+};
+
+const interpolateJourneyScale = (t: number) => {
+  const clamped = Math.min(1, Math.max(0, t));
+  for (let i = 0; i < JOURNEY_SCALE_KEYS.length - 1; i++) {
+    const k1 = JOURNEY_SCALE_KEYS[i];
+    const k2 = JOURNEY_SCALE_KEYS[i + 1];
+    if (clamped >= k1.t && clamped <= k2.t) {
+      const segT = (clamped - k1.t) / (k2.t - k1.t);
+      const ease = 0.5 - 0.5 * Math.cos(segT * Math.PI);
+      return k1.scale + (k2.scale - k1.scale) * ease;
+    }
+  }
+  return JOURNEY_SCALE_KEYS[JOURNEY_SCALE_KEYS.length - 1].scale;
+};
 
 // ---------------------------------------------------------------------------
 // 3-LAYER COORDINATED SHADER SYSTEM (GLSL)
@@ -256,9 +331,9 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProps>(
   function FilamentSpoolCanvas(
     {
-      color = '#6258F5',
+      color = '#5401C5',
       finish = 'Silk',
-      rimColor = '#6258F5',
+      rimColor = '#5401C5',
       rotationX = 0.22,
       rotationY = -0.45,
       rotationZ = 0.04,
@@ -281,6 +356,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
     const strandMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
     const flangeMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
     const edgeMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+    const hubMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
     const sweepMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
     const diffusionMatRef = useRef<THREE.ShaderMaterial | null>(null);
     const takeoverMatRef = useRef<THREE.ShaderMaterial | null>(null);
@@ -291,9 +367,11 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
     const rimLightRef = useRef<THREE.DirectionalLight | null>(null);
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const shadowRef = useRef<THREE.Mesh | null>(null);
     
     // State refs
     const progressRef = useRef(0);
+    const journeyProgressRef = useRef(0);
     const visibleRef = useRef(true);
     const frameRef = useRef<number | null>(null);
     const clockRef = useRef(new THREE.Clock());
@@ -328,6 +406,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         setProgress(nextProgress) {
           // Pure variable update: RAF automatically handles 60fps rendering without blocking scroll events!
           progressRef.current = clamp(nextProgress);
+        },
+        setJourneyProgress(journeyProgress) {
+          journeyProgressRef.current = clamp(journeyProgress, 0, 1);
         },
         triggerColorSwitch(newColorHex, newFinish = 'Silk', newRimHex) {
           const rim = newRimHex || newColorHex;
@@ -417,15 +498,15 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       if (fallbackRef.current) fallbackRef.current.style.display = 'none';
 
       // --- HIGH-EFFICIENCY STUDIO LIGHTING (2 Lights Only) ---
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xcdd2ee, 2.4);
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0xf0f0f0, 2.6);
       scene.add(hemiLight);
 
-      const keyLight = new THREE.DirectionalLight(0xffffff, 3.6);
+      const keyLight = new THREE.DirectionalLight(0xffffff, 3.8);
       keyLight.position.set(5.0, 6.0, 5.5);
       scene.add(keyLight);
       keyLightRef.current = keyLight;
 
-      const rimLight = new THREE.DirectionalLight(new THREE.Color(rimColor), 3.8);
+      const rimLight = new THREE.DirectionalLight(new THREE.Color(rimColor), 3.6);
       rimLight.position.set(0, 4.5, -5.0);
       scene.add(rimLight);
       rimLightRef.current = rimLight;
@@ -444,28 +525,33 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       const hubRadius = 0.92;
       const arborRadius = 0.38;
 
-      // High-performance smoked polycarbonate (MeshStandardMaterial avoids expensive transmission passes)
+      // High-performance precision smoked polycarbonate
       const flangeMaterial = new THREE.MeshStandardMaterial({
-        color: 0x161a35,
-        roughness: 0.18,
+        color: 0x1c1d22,
+        roughness: 0.20,
         metalness: 0.12,
         transparent: true,
-        opacity: 0.90,
+        opacity: 0.92,
       });
       flangeMaterialRef.current = flangeMaterial;
 
       const edgeMaterial = new THREE.MeshStandardMaterial({
-        color: 0x0c0f24,
+        color: 0x121316,
         roughness: 0.35,
-        metalness: 0.22,
+        metalness: 0.20,
+        transparent: true,
+        opacity: 1.0,
       });
       edgeMaterialRef.current = edgeMaterial;
 
       const hubMaterial = new THREE.MeshStandardMaterial({
-        color: 0x080a16,
-        roughness: 0.60,
+        color: 0x111111,
+        roughness: 0.50,
         metalness: 0.15,
+        transparent: true,
+        opacity: 1.0,
       });
+      hubMaterialRef.current = hubMaterial;
 
       // Procedural bump texture
       let bumpTexture: THREE.CanvasTexture | null = null;
@@ -497,6 +583,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         metalness: finish === 'Silk' ? 0.14 : 0.02,
         bumpMap: bumpTexture,
         bumpScale: 0.030,
+        transparent: true,
+        opacity: 1.0,
       });
       materialRef.current = filamentMaterial;
 
@@ -510,8 +598,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           uSweepAngle: { value: 0.0 },
           uTailLength: { value: 0.38 },
           uColorCore: { value: new THREE.Color('#FFFFFF') },
-          uColorPeriwinkle: { value: new THREE.Color('#6258F5') },
-          uColorLavender: { value: new THREE.Color('#C7C2FA') },
+          uColorPeriwinkle: { value: new THREE.Color('#5401C5') },
+          uColorLavender: { value: new THREE.Color('#EEEAF5') },
           uBaseGlow: { value: 0.0 },
           uIntensity: { value: 0.0 },
           uTime: { value: 0.0 },
@@ -530,8 +618,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         uniforms: {
           uDiffusionStrength: { value: 0.0 },
           uColorCore: { value: new THREE.Color('#FFFFFF') },
-          uColorLavender: { value: new THREE.Color('#C7C2FA') },
-          uColorPeriwinkle: { value: new THREE.Color('#6258F5') },
+          uColorLavender: { value: new THREE.Color('#EEEAF5') },
+          uColorPeriwinkle: { value: new THREE.Color('#5401C5') },
         },
         transparent: true,
         blending: THREE.AdditiveBlending,
@@ -549,8 +637,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           uCenter: { value: new THREE.Vector2(0.5, 0.5) },
           uAspect: { value: 1.0 },
           uColorCore: { value: new THREE.Color('#FFFFFF') },
-          uColorLavender: { value: new THREE.Color('#E8E5FF') },
-          uColorPeriwinkle: { value: new THREE.Color('#6258F5') },
+          uColorLavender: { value: new THREE.Color('#EEEAF5') },
+          uColorPeriwinkle: { value: new THREE.Color('#5401C5') },
         },
         transparent: true,
         blending: THREE.AdditiveBlending,
@@ -596,7 +684,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         for (let i = 0; i < 6; i++) {
           const angle = (i * Math.PI) / 3;
           const slotGeo = new THREE.BoxGeometry(0.38, 0.78, 0.08);
-          const slotMat = new THREE.MeshBasicMaterial({ color: 0x050711 });
+          const slotMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
           const slot = new THREE.Mesh(slotGeo, slotMat);
           slot.position.set(
             Math.cos(angle) * 1.52,
@@ -657,8 +745,10 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           color: new THREE.Color(color),
           roughness: 0.22,
           metalness: 0.16,
-          emissive: new THREE.Color(i % 2 === 0 ? '#6258F5' : '#C7C2FA'),
+          emissive: new THREE.Color(i % 2 === 0 ? '#5401C5' : '#EEEAF5'),
           emissiveIntensity: 0.0,
+          transparent: true,
+          opacity: 1.0,
         });
         windingMats.push(wMat);
         const stepMesh = new THREE.Mesh(stepGeo, wMat);
@@ -682,14 +772,15 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       const strandMesh = new THREE.Mesh(strandGeo, strandMaterial);
       spoolGroup.add(strandMesh);
 
-      // Shadow
+      // Studio Contact Shadow
       const shadow = new THREE.Mesh(
         new THREE.CircleGeometry(1.9, 24),
-        new THREE.MeshBasicMaterial({ color: 0x070914, transparent: true, opacity: 0.16, depthWrite: false })
+        new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.10, depthWrite: false })
       );
       shadow.scale.set(1.35, 0.28, 1);
       shadow.position.set(0.1, -2.4, -1.2);
       scene.add(shadow);
+      shadowRef.current = shadow;
 
       // Start Entrance Animation
       entranceAnimRef.current.startTime = clockRef.current.getElapsedTime();
@@ -793,7 +884,198 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         const cursorShiftY = enableMouseParallax ? -m.currentY * 0.12 : 0;
 
         if (scrollDriven) {
-          const paced = clamp(rawProgress, 0, 1);
+          const jProgress = journeyProgressRef.current;
+
+          if (jProgress > 0.001) {
+            // ===============================================================
+            // CONTINUOUS HOMEPAGE JOURNEY (HERO EXIT -> FOOTER RESTING DOCK)
+            // ===============================================================
+            const containerW = containerRef.current?.clientWidth || window.innerWidth;
+            const containerH = containerRef.current?.clientHeight || window.innerHeight;
+            const aspect = containerW / Math.max(1, containerH);
+            const isMobile = containerW < 640;
+            const respX = containerW < 1440 || aspect < 1.85 ? 0.85 : 1.0;
+            const respScale = containerW < 1440 || aspect < 1.85 ? 0.88 : 1.0;
+
+            if (jProgress <= 0.08) {
+              // PHASE 1: Seamless Hand-off & Shrink Transition (0.00 -> 0.08)
+              const shrinkT = jProgress / 0.08;
+              const easeShrink = 0.5 - 0.5 * Math.cos(shrinkT * Math.PI);
+
+              const heroClimax = CINEMATIC_TIMELINE_KEYFRAMES[CINEMATIC_TIMELINE_KEYFRAMES.length - 1];
+              const p0 = JOURNEY_WAYPOINTS[0];
+              const r0 = JOURNEY_ROT_KEYS[0];
+              const s0 = JOURNEY_SCALE_KEYS[0].scale;
+
+              let posX = lerp(heroClimax.posX, p0.x * respX, easeShrink) + floatX + cursorShiftX;
+              let posY = lerp(heroClimax.posY, p0.y, easeShrink) + floatY + cursorShiftY;
+              let posZ = lerp(heroClimax.posZ, p0.z, easeShrink);
+              let sc = lerp(heroClimax.scale, s0 * respScale, easeShrink);
+
+              let rotX = lerp(heroClimax.rotX, r0.rotX, easeShrink) + floatRotX + cursorTiltX;
+              let rotY = lerp(heroClimax.rotY, r0.rotY, easeShrink) + floatRotY + cursorTiltY;
+              let rotZ = lerp(heroClimax.rotZ, r0.rotZ, easeShrink) + floatRotZ;
+
+              if (isMobile) {
+                posX = floatX + cursorShiftX;
+                posY = lerp(0.0, 0.08, easeShrink) + floatY + cursorShiftY;
+                posZ = lerp(1.4, 0.0, easeShrink);
+                sc = lerp(heroClimax.scale * 0.70, s0 * 0.70, easeShrink);
+              }
+
+              spoolGroupRef.current.position.set(posX, posY, posZ);
+              spoolGroupRef.current.rotation.set(rotX, rotY, rotZ);
+              spoolGroupRef.current.scale.setScalar(sc);
+
+              if (cameraRef.current) {
+                const baseCamZ = isMobile ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
+                cameraRef.current.position.z = lerp(baseCamZ - heroClimax.dollyZ, baseCamZ, easeShrink);
+              }
+
+              // Smoothly dissolve hero glow and luminous bloom back to physical finish
+              const glowFade = 1.0 - easeShrink;
+              if (takeoverMatRef.current && cameraRef.current && containerRef.current) {
+                const spoolWorldPos = new THREE.Vector3();
+                spoolGroupRef.current.getWorldPosition(spoolWorldPos);
+                spoolWorldPos.project(cameraRef.current);
+                takeoverMatRef.current.uniforms.uCenter.value.set((spoolWorldPos.x + 1.0) * 0.5, (spoolWorldPos.y + 1.0) * 0.5);
+                takeoverMatRef.current.uniforms.uAspect.value = aspect;
+                takeoverMatRef.current.uniforms.uRevealProgress.value = glowFade;
+              }
+              if (diffusionMatRef.current) {
+                diffusionMatRef.current.uniforms.uDiffusionStrength.value = glowFade * 1.35;
+              }
+              if (edgeMaterialRef.current) {
+                edgeMaterialRef.current.emissiveIntensity = lerp(1.5, 0.25, easeShrink);
+              }
+              if (flangeMaterialRef.current) {
+                flangeMaterialRef.current.emissiveIntensity = lerp(0.75, 0.0, easeShrink);
+              }
+              if (materialRef.current) {
+                materialRef.current.emissiveIntensity = lerp(0.95, 0.0, easeShrink);
+              }
+              if (strandMaterialRef.current) {
+                strandMaterialRef.current.emissiveIntensity = lerp(1.35, 0.0, easeShrink);
+              }
+              windingMaterialsRef.current.forEach((w) => {
+                w.emissiveIntensity = lerp(1.5, 0.0, easeShrink);
+                w.opacity = 1.0;
+              });
+              if (materialRef.current) materialRef.current.opacity = 1.0;
+              if (flangeMaterialRef.current) flangeMaterialRef.current.opacity = 0.92;
+              if (edgeMaterialRef.current) edgeMaterialRef.current.opacity = 1.0;
+              if (hubMaterialRef.current) hubMaterialRef.current.opacity = 1.0;
+              if (strandMaterialRef.current) strandMaterialRef.current.opacity = 1.0;
+              if (shadowRef.current && shadowRef.current.material instanceof THREE.Material) {
+                (shadowRef.current.material as THREE.MeshBasicMaterial).opacity = 0.10;
+              }
+              if (keyLightRef.current) keyLightRef.current.intensity = 4.2;
+              if (spoolGroupRef.current) spoolGroupRef.current.visible = true;
+
+              if (sweepMaterialRef.current) {
+                sweepMaterialRef.current.uniforms.uIntensity.value = lerp(1.25, 0.0, easeShrink);
+              }
+              if (rimLightRef.current) {
+                rimLightRef.current.intensity = lerp(6.0, 3.8, easeShrink);
+              }
+            } else {
+              // PHASE 2: Catmull-Rom Spline Flight across Homepage Sections (0.08 -> 1.00)
+              const jt = clamp((jProgress - 0.08) / 0.92, 0, 1);
+              const pt = journeyCurve.getPoint(jt);
+              const baseRot = interpolateJourneyRot(jt);
+              const baseScale = interpolateJourneyScale(jt);
+              const axialSpin = jt * 10.5; // continuous axial roll
+
+              let posX = pt.x * respX + floatX + cursorShiftX;
+              let posY = pt.y + floatY + cursorShiftY;
+              let posZ = pt.z;
+              let sc = baseScale * respScale;
+
+              if (isMobile) {
+                const mobX = pt.x < 0 ? pt.x * 0.65 - 0.35 : pt.x * 0.50;
+                posX = mobX + floatX + cursorShiftX;
+                posY = (pt.y * 0.85) + floatY + cursorShiftY;
+                posZ = pt.z;
+                sc = sc * 0.70;
+              }
+
+              const rotX = baseRot.rotX + floatRotX + cursorTiltX;
+              const rotY = baseRot.rotY + axialSpin + floatRotY + cursorTiltY;
+              const rotZ = baseRot.rotZ + floatRotZ;
+
+              spoolGroupRef.current.position.set(posX, posY, posZ);
+              spoolGroupRef.current.rotation.set(rotX, rotY, rotZ);
+              spoolGroupRef.current.scale.setScalar(Math.max(0, sc));
+
+              if (cameraRef.current) {
+                const baseCamZ = isMobile ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
+                cameraRef.current.position.z = baseCamZ;
+              }
+
+              // Normal clean physical materials during travel
+              if (takeoverMatRef.current) takeoverMatRef.current.uniforms.uRevealProgress.value = 0.0;
+              if (diffusionMatRef.current) diffusionMatRef.current.uniforms.uDiffusionStrength.value = 0.0;
+              if (sweepMaterialRef.current) sweepMaterialRef.current.uniforms.uIntensity.value = 0.0;
+              if (flangeMaterialRef.current) flangeMaterialRef.current.emissiveIntensity = 0.0;
+              if (strandMaterialRef.current) strandMaterialRef.current.emissiveIntensity = 0.0;
+              windingMaterialsRef.current.forEach((w) => {
+                w.emissiveIntensity = 0.0;
+              });
+
+              // =============================================================
+              // EXTREME BOTTOM RIGHT CORNER DISAPPEARANCE (jt: 0.86 -> 1.00)
+              // =============================================================
+              const exitT = clamp((jt - 0.86) / 0.14, 0, 1);
+              const easeExit = 0.5 - 0.5 * Math.cos(exitT * Math.PI);
+              const exitAlpha = 1.0 - easeExit;
+
+              if (materialRef.current) materialRef.current.opacity = exitAlpha;
+              if (flangeMaterialRef.current) flangeMaterialRef.current.opacity = exitAlpha * 0.92;
+              if (edgeMaterialRef.current) {
+                edgeMaterialRef.current.opacity = exitAlpha;
+                edgeMaterialRef.current.emissiveIntensity = 0.15 * exitAlpha;
+              }
+              if (hubMaterialRef.current) hubMaterialRef.current.opacity = exitAlpha;
+              if (strandMaterialRef.current) strandMaterialRef.current.opacity = exitAlpha;
+              windingMaterialsRef.current.forEach((w) => {
+                w.opacity = exitAlpha;
+              });
+
+              if (shadowRef.current && shadowRef.current.material instanceof THREE.Material) {
+                (shadowRef.current.material as THREE.MeshBasicMaterial).opacity = exitAlpha * 0.10;
+              }
+              if (rimLightRef.current) {
+                rimLightRef.current.intensity = 3.8 * exitAlpha;
+              }
+              if (keyLightRef.current) {
+                keyLightRef.current.intensity = 4.2 * exitAlpha;
+              }
+
+              if (spoolGroupRef.current) {
+                if (jt >= 0.995 || sc <= 0.002 || exitAlpha <= 0.002) {
+                  spoolGroupRef.current.visible = false;
+                } else {
+                  spoolGroupRef.current.visible = true;
+                }
+              }
+            }
+          } else {
+            // ===============================================================
+            // HERO SCROLL TIMELINE (0% -> 100% WITH 3D4MAKERS LUMINOUS TAKEOVER)
+            // ===============================================================
+            if (spoolGroupRef.current) spoolGroupRef.current.visible = true;
+            if (materialRef.current) materialRef.current.opacity = 1.0;
+            if (flangeMaterialRef.current) flangeMaterialRef.current.opacity = 0.92;
+            if (edgeMaterialRef.current) edgeMaterialRef.current.opacity = 1.0;
+            if (hubMaterialRef.current) hubMaterialRef.current.opacity = 1.0;
+            if (strandMaterialRef.current) strandMaterialRef.current.opacity = 1.0;
+            windingMaterialsRef.current.forEach((w) => { w.opacity = 1.0; });
+            if (shadowRef.current && shadowRef.current.material instanceof THREE.Material) {
+              (shadowRef.current.material as THREE.MeshBasicMaterial).opacity = 0.10;
+            }
+            if (keyLightRef.current) keyLightRef.current.intensity = 4.2;
+
+            const paced = clamp(rawProgress, 0, 1);
 
           let segIndex = 0;
           for (let i = 0; i < CINEMATIC_TIMELINE_KEYFRAMES.length - 1; i++) {
@@ -822,9 +1104,18 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
           if (isMobile) {
             posX = floatX + cursorShiftX;
-            posY = lerp(0.55, -0.06, paced) + floatY + cursorShiftY;
+            posY = lerp(0.50, -0.06, paced) + floatY + cursorShiftY;
             posZ = lerp(0, 1.4, paced);
-            sc = sc * 0.72;
+            sc = sc * 0.70;
+          } else {
+            // Adaptive positioning for laptops: check aspect ratio & viewport width
+            const containerW = containerRef.current?.clientWidth || window.innerWidth;
+            const containerH = containerRef.current?.clientHeight || window.innerHeight;
+            const aspect = containerW / Math.max(1, containerH);
+            if (containerW < 1440 || aspect < 1.85) {
+              posX = posX * 0.88 - 0.12;
+              sc = sc * 0.92;
+            }
           }
 
           spoolGroupRef.current.rotation.set(rotX, rotY, rotZ);
@@ -832,7 +1123,10 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           spoolGroupRef.current.scale.setScalar(sc);
 
           if (cameraRef.current) {
-            const baseCamZ = isMobile ? 8.4 : 7.8;
+            const containerW = containerRef.current?.clientWidth || window.innerWidth;
+            const containerH = containerRef.current?.clientHeight || window.innerHeight;
+            const aspect = containerW / Math.max(1, containerH);
+            const baseCamZ = isMobile ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
             cameraRef.current.position.z = baseCamZ - dollyZ;
           }
 
@@ -856,20 +1150,20 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
           // Update Layer 1 Geometry Materials:
           if (edgeMaterialRef.current) {
-            edgeMaterialRef.current.emissive.set('#6258F5');
+            edgeMaterialRef.current.emissive.set('#5401C5');
             edgeMaterialRef.current.emissiveIntensity = edgeEmission * 1.5;
           }
           if (flangeMaterialRef.current) {
-            flangeMaterialRef.current.emissive.set('#3B32B3');
+            flangeMaterialRef.current.emissive.set('#35007C');
             flangeMaterialRef.current.emissiveIntensity = edgeEmission * 0.75;
           }
           if (materialRef.current) {
             const baseColor = materialRef.current.color;
-            materialRef.current.emissive.set('#6258F5').lerp(baseColor, 0.40);
+            materialRef.current.emissive.set('#5401C5').lerp(baseColor, 0.40);
             materialRef.current.emissiveIntensity = windingEmission * 0.95;
           }
           if (strandMaterialRef.current) {
-            strandMaterialRef.current.emissive.set('#8B80F9');
+            strandMaterialRef.current.emissive.set('#6C1DE6');
             strandMaterialRef.current.emissiveIntensity = windingEmission * 1.35;
           }
 
@@ -917,7 +1211,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
             const lightBoost = clamp((rawProgress - 0.80) / 0.15) * 2.2;
             rimLightRef.current.intensity = 3.8 + lightBoost;
           }
-        } else {
+        }
+      } else {
           if (sweepMaterialRef.current) {
             sweepMaterialRef.current.uniforms.uIntensity.value = 0.0;
             sweepMaterialRef.current.uniforms.uProgress.value = 0.0;
@@ -977,8 +1272,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         const width = Math.max(1, container.clientWidth);
         const height = Math.max(1, container.clientHeight);
         renderer.setSize(width, height, false);
-        camera.aspect = width / height;
-        camera.position.z = width < 640 ? 8.4 : 7.8;
+        const aspect = width / height;
+        camera.aspect = aspect;
+        camera.position.z = width < 640 ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
         camera.updateProjectionMatrix();
       };
 

@@ -10,22 +10,25 @@ const config: Config = {
     extend: {
       colors: {
         ufill: {
-          primary: "#11152E",      // Midnight Navy
-          primaryDark: "#0B0E20",  // Deepest Navy
-          secondary: "#6258F5",    // Electric Periwinkle
-          secondaryHover: "#5044E4",
-          tertiary: "#E9E8FF",     // Soft Lavender
-          tertiaryLight: "#F4F3FF",
-          background: "#F8F9FC",   // Porcelain White
-          card: "#FFFFFF",
-          cardMuted: "#F3F5FA",
-          border: "#E2E6F2",
-          borderDark: "#23294C",
-          text: "#11152E",         // Dark Navy
-          textMuted: "#5D6582",    // Slate Navy
-          textDim: "#8E96B2",      // Light Navy Slate
-          accent: "#6258F5",
-          accentGlow: "rgba(98, 88, 245, 0.15)",
+          primary: "#111111",      // Deep Charcoal Black
+          primaryDark: "#0A0A0A",  // Deepest Neutral
+          secondary: "#5401C5",    // Original Royal Violet brand accent
+          secondaryHover: "#43009E",
+          tertiary: "#EEEAF5",     // Subtle Tinted Mist
+          tertiaryLight: "#F8F6FC",
+          background: "#FAFAFA",   // Body Background Off-White
+          card: "#FFFFFF",         // Pure White Cards
+          cardMuted: "#F3F3F3",    // Soft Surface Neutral
+          border: "#E5E5E5",       // Delicate Structural Rule
+          borderDark: "#181818",   // Dark Surface Border
+          text: "#252525",         // Body Text Deep Slate
+          textHeading: "#111111",  // Bold Headline Neutral
+          textMuted: "#696969",    // Muted Slate Text
+          textDim: "#9CA3AF",      // Subtle Meta Text
+          surfaceDark: "#181818",  // Technical Dark Surface
+          surfaceSoft: "#F3F3F3",  // Soft Neutral Surface
+          accent: "#5401C5",       // Royal Violet Accent
+          accentGlow: "rgba(84, 1, 197, 0.12)",
           success: "#10B981",
           warning: "#F59E0B",
           danger: "#EF4444",
@@ -33,20 +36,18 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          "var(--font-plus-jakarta-sans)",
-          "Plus Jakarta Sans",
+          "'Plus Jakarta Sans'",
           "-apple-system",
           "BlinkMacSystemFont",
-          "Segoe UI",
+          "'Segoe UI'",
           "Roboto",
           "sans-serif",
         ],
         display: [
-          "var(--font-plus-jakarta-sans)",
-          "Plus Jakarta Sans",
+          "'Plus Jakarta Sans'",
           "-apple-system",
           "BlinkMacSystemFont",
-          "Segoe UI",
+          "'Segoe UI'",
           "sans-serif",
         ],
         mono: [
@@ -69,11 +70,11 @@ const config: Config = {
         mega: "0.2em",
       },
       boxShadow: {
-        "elevation-1": "0 2px 8px -2px rgba(17, 21, 46, 0.05), 0 1px 3px -1px rgba(17, 21, 46, 0.03)",
-        "elevation-2": "0 8px 24px -4px rgba(17, 21, 46, 0.08), 0 4px 8px -2px rgba(17, 21, 46, 0.04)",
-        "elevation-3": "0 20px 48px -8px rgba(17, 21, 46, 0.12), 0 8px 16px -4px rgba(17, 21, 46, 0.06)",
-        "glow-purple": "0 0 35px -5px rgba(98, 88, 245, 0.35)",
-        "glow-subtle": "0 0 20px -3px rgba(98, 88, 245, 0.15)",
+        "elevation-1": "0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)",
+        "elevation-2": "0 4px 16px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03)",
+        "elevation-3": "0 12px 32px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04)",
+        "glow-violet": "0 0 30px -4px rgba(84, 1, 197, 0.25)",
+        "glow-subtle": "0 0 16px -2px rgba(84, 1, 197, 0.10)",
       },
       borderRadius: {
         "2xl": "1rem",
@@ -82,20 +83,20 @@ const config: Config = {
       },
       keyframes: {
         "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "pulse-subtle": {
           "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.5" },
+          "50%": { opacity: "0.6" },
         },
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-6px)" },
+          "50%": { transform: "translateY(-5px)" },
         },
       },
       animation: {
-        "fade-in": "fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "fade-in": "fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "pulse-subtle": "pulse-subtle 3s ease-in-out infinite",
         float: "float 6s ease-in-out infinite",
       },
@@ -103,4 +104,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;
