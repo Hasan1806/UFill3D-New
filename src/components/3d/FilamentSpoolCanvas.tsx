@@ -1141,7 +1141,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
               const targetScale = (maxPixelDiameter / containerH) * (visibleHalfHeight * 2) / 4.30;
 
               posX = lerp(targetWorldX, 0.00, paced) + floatX + cursorShiftX;
-              posY = lerp(targetWorldY, 0.18, paced) + floatY + cursorShiftY;
+              posY = lerp(targetWorldY + 0.16, 0.18, paced) + floatY + cursorShiftY;
               posZ = lerp(0, 0.45, paced);
               sc = lerp(targetScale, 0.52, paced);
             }
@@ -1149,15 +1149,15 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
           if (!anchoredOnMobile) {
             if (isPhone) {
-              // Mobile fallback: centered in the blank stage window between text & swatches
+              // Mobile fallback: lifted slightly up in the blank stage window
               posX = floatX + cursorShiftX;
-              posY = lerp(0.65, 0.20, paced) + floatY + cursorShiftY;
+              posY = lerp(0.80, 0.20, paced) + floatY + cursorShiftY;
               posZ = lerp(0, 0.45, paced);
               sc = lerp(0.28, 0.52, paced);
             } else if (isTablet) {
               // Tablet: Centered with comfortable scale
               posX = floatX + cursorShiftX;
-              posY = lerp(0.40, 0.16, paced) + floatY + cursorShiftY;
+              posY = lerp(0.50, 0.16, paced) + floatY + cursorShiftY;
               posZ = lerp(0, 0.60, paced);
               sc = lerp(0.36, 0.65, paced);
             } else {
