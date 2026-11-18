@@ -179,6 +179,14 @@ export function ColorExplorer() {
         style={{ backgroundColor: selectedColor.hex }}
       />
 
+      {/* Atmospheric Luminous Light Bridge from Hero Transition */}
+      <div 
+        className="absolute inset-x-0 top-0 h-44 pointer-events-none z-10"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(248, 249, 252, 0.12), transparent)',
+        }}
+      />
+
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
         {/* Editorial Section Heading */}
         <div className="max-w-3xl mb-14 space-y-4">

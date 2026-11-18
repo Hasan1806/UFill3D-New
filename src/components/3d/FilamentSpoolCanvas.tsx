@@ -50,7 +50,7 @@ interface SpoolCanvasProps {
   enableMouseParallax?: boolean;
 }
 
-// Snappy, Fluid 3D Timeline Keyframes
+// Snappy, Fluid 3D Timeline Keyframes (Reference 3D4Makers Choreography)
 const CINEMATIC_TIMELINE_KEYFRAMES = [
   // 0% - 15%: Opening hero composition
   { progress: 0.00, rotX: 0.18,  rotY: -0.42, rotZ: 0.05, posX: 1.45, posY: 0.00,  posZ: 0.00, scale: 1.08, fov: 38.0, orbitAngle: 0.00, dollyZ: 0.00 },
@@ -60,33 +60,37 @@ const CINEMATIC_TIMELINE_KEYFRAMES = [
   { progress: 0.35, rotX: -0.20, rotY: 0.65,  rotZ: 0.90, posX: 0.75, posY: -0.06, posZ: 0.40, scale: 1.20, fov: 37.8, orbitAngle: 0.16, dollyZ: 0.20 },
 
   // 35% - 60%: Three-quarter product reveal (wound core & cutout windows)
-  { progress: 0.60, rotX: 0.28,  rotY: 1.25,  rotZ: 1.60, posX: 0.20, posY: 0.04,  posZ: 0.65, scale: 1.25, fov: 37.5, orbitAngle: 0.28, dollyZ: 0.32 },
+  { progress: 0.60, rotX: 0.25,  rotY: 1.25,  rotZ: 1.60, posX: 0.20, posY: 0.04,  posZ: 0.65, scale: 1.25, fov: 37.5, orbitAngle: 0.28, dollyZ: 0.32 },
 
-  // 60% - 80%: Edge-on width & rear flange reveal, initiating re-centering
-  { progress: 0.80, rotX: -0.12, rotY: 2.20,  rotZ: 2.45, posX: 0.06, posY: 0.00,  posZ: 0.78, scale: 1.27, fov: 37.2, orbitAngle: 0.18, dollyZ: 0.38 },
+  // 60% - 72%: Controlled final approach (re-centering and rotating toward front-on alignment)
+  { progress: 0.72, rotX: 0.08,  rotY: 2.70,  rotZ: 2.85, posX: 0.05, posY: 0.00,  posZ: 0.75, scale: 1.28, fov: 37.2, orbitAngle: 0.10, dollyZ: 0.38 },
 
-  // 80% - 92%: Final macro zoom glide & majestic centering for the Peak Glow Reveal
-  { progress: 0.92, rotX: 0.06,  rotY: 2.95,  rotZ: 3.14, posX: 0.00, posY: 0.00,  posZ: 0.85, scale: 1.30, fov: 37.0, orbitAngle: 0.00, dollyZ: 0.42 },
+  // 72% - 82%: State A -> State B (Detailed reel, dark mechanical center, circumference emission awakens)
+  { progress: 0.82, rotX: 0.04,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 0.88, scale: 1.36, fov: 37.0, orbitAngle: 0.00, dollyZ: 0.46 },
 
-  // 92% - 100%: Re-centering transition & graceful hand-off into Section 2
-  { progress: 1.00, rotX: 0.02,  rotY: 3.14,  rotZ: 3.14, posX: 0.00, posY: 0.00,  posZ: 0.85, scale: 1.30, fov: 36.8, orbitAngle: 0.00, dollyZ: 0.45 },
+  // 82% - 90%: State B -> State C (Winding illumination & 3D diffusion expand, camera dollies forward)
+  { progress: 0.90, rotX: 0.02,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.25, scale: 1.52, fov: 36.8, orbitAngle: 0.00, dollyZ: 0.68 },
+
+  // 90% - 96%: State C -> State D (Broad luminous close-up, concentric windings fill composition, light spreads)
+  { progress: 0.96, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.70, scale: 1.78, fov: 36.5, orbitAngle: 0.00, dollyZ: 0.95 },
+
+  // 96% - 100%: State D -> State E (Radial light takeover expands to full frame, revealing next section)
+  { progress: 1.00, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 2.05, scale: 2.05, fov: 36.0, orbitAngle: 0.00, dollyZ: 1.20 },
 ];
 
 // ---------------------------------------------------------------------------
-// CIRCUMFERENCE ENERGY SWEEP & ATMOSPHERIC HALO SHADERS (GLSL)
+// 3-LAYER COORDINATED SHADER SYSTEM (GLSL)
 // ---------------------------------------------------------------------------
 
+// LAYER 1: Circumference & Edge Torus Emission Shader
 const SWEEP_VERTEX_SHADER = `
 varying vec2 vUv;
 varying vec3 vNormal;
-varying vec3 vViewPosition;
 
 void main() {
   vUv = uv;
-  vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-  vViewPosition = -mvPosition.xyz;
   vNormal = normalMatrix * normal;
-  gl_Position = projectionMatrix * mvPosition;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
@@ -103,45 +107,40 @@ uniform float uTime;
 
 varying vec2 vUv;
 varying vec3 vNormal;
-varying vec3 vViewPosition;
 
 void main() {
   if (uProgress <= 0.001 && uBaseGlow <= 0.001) {
     discard;
   }
 
-  // Cross-section tube profile: peak in center, feathered at edges
+  // Cross-section tube profile
   float crossIntensity = sin(clamp(vUv.y, 0.0, 1.0) * 3.14159265);
   crossIntensity = pow(crossIntensity, 1.35);
 
   // Angular distance along circular rim (vUv.x is normalized [0, 1])
   float delta = fract(uSweepAngle - vUv.x + 1.0);
 
-  // Trailing energy falloff (Phase B)
+  // Trailing energy falloff
   float tail = 0.0;
   if (delta < uTailLength) {
     float normTail = delta / uTailLength;
     tail = pow(1.0 - normTail, 2.2);
   }
 
-  // Bright hot leading edge pulse
+  // Bright leading pulse
   float leadEdge = 0.0;
-  if (delta < 0.045) {
-    leadEdge = smoothstep(0.045, 0.0, delta);
+  if (delta < 0.05) {
+    leadEdge = smoothstep(0.05, 0.0, delta);
   }
 
-  // Phase A: Controlled ambient rim glow along the flange perimeter
-  float ambientRim = uBaseGlow * 0.38;
+  // Controlled ambient rim glow along circumference
+  float ambientRim = uBaseGlow * 0.45;
 
-  // Total luminosity calculation
   float totalLum = (tail * 1.85 + leadEdge * 2.85 + ambientRim) * crossIntensity * uIntensity;
 
-  // Luminous chromatic grading:
-  // Base Periwinkle (#6258F5) -> Soft Lavender (#C7C2FA) -> Leading Core Ice White (#F0EFFF)
   vec3 col = mix(uColorPeriwinkle, uColorLavender, clamp(tail * 1.25, 0.0, 1.0));
   col = mix(col, uColorCore, clamp(leadEdge * 1.6, 0.0, 1.0));
 
-  // Subtle photonic high-frequency shimmer
   float shimmer = 1.0 + 0.06 * sin(vUv.x * 62.83 + uTime * 5.5);
   col *= shimmer;
 
@@ -150,7 +149,8 @@ void main() {
 }
 `;
 
-const HALO_VERTEX_SHADER = `
+// LAYER 2: 3D Volumetric Atmospheric Diffusion Aura
+const DIFFUSION_VERTEX_SHADER = `
 varying vec2 vUv;
 
 void main() {
@@ -159,32 +159,94 @@ void main() {
 }
 `;
 
-const HALO_FRAGMENT_SHADER = `
-uniform vec3 uColor;
-uniform float uOpacity;
-varying vec2 vUv;
+const DIFFUSION_FRAGMENT_SHADER = `
+uniform float uDiffusionStrength;
+uniform vec3  uColorCore;
+uniform vec3  uColorLavender;
+uniform vec3  uColorPeriwinkle;
+varying vec2  vUv;
 
 void main() {
-  if (uOpacity <= 0.001) {
+  if (uDiffusionStrength <= 0.001) {
     discard;
   }
 
   vec2 center = vUv - vec2(0.5);
   float dist = length(center) * 2.0;
 
-  float innerEdge = 0.46;
-  float outerEdge = 1.00;
-
-  if (dist < innerEdge || dist > outerEdge) {
+  float inner = 0.28;
+  float outer = 1.00;
+  if (dist < inner || dist > outer) {
     discard;
   }
 
-  float t = (dist - innerEdge) / (outerEdge - innerEdge);
+  // Soft bell curve peaking over the wound filament core
+  float t = (dist - inner) / (outer - inner);
   float curve = sin(t * 3.14159265);
-  curve = pow(curve, 1.8);
+  curve = pow(curve, 1.45);
 
-  float alpha = curve * uOpacity;
-  gl_FragColor = vec4(uColor * alpha, alpha);
+  vec3 col = mix(uColorPeriwinkle, uColorLavender, t);
+  col = mix(col, uColorCore, clamp(curve * 0.75, 0.0, 1.0));
+
+  float alpha = curve * uDiffusionStrength * 0.75;
+  gl_FragColor = vec4(col * alpha, alpha);
+}
+`;
+
+// LAYER 3: Optical Bloom & Radial Caustic Aperture (Never an opaque white wash)
+const TAKEOVER_VERTEX_SHADER = `
+varying vec2 vUv;
+
+void main() {
+  vUv = uv;
+  // Full-screen NDC quad: position.xy directly maps to screen clip coordinates
+  gl_Position = vec4(position.xy, 0.0, 1.0);
+}
+`;
+
+const TAKEOVER_FRAGMENT_SHADER = `
+uniform float uRevealProgress;
+uniform vec2  uCenter;
+uniform float uAspect;
+uniform vec3  uColorCore;
+uniform vec3  uColorLavender;
+uniform vec3  uColorPeriwinkle;
+
+varying vec2 vUv;
+
+void main() {
+  if (uRevealProgress <= 0.001) {
+    discard;
+  }
+
+  // Normalized aspect-corrected coordinate relative to the 3D spool center
+  vec2 coord = vUv - uCenter;
+  coord.x *= uAspect;
+  float dist = length(coord);
+
+  // Optical caustic ripples radiating from the spool core
+  float ripple = sin(dist * 28.0 - uRevealProgress * 8.0) * 0.5 + 0.5;
+  ripple = pow(ripple, 3.5) * 0.12;
+
+  // Expanding luminous bloom radius
+  float waveT = pow(uRevealProgress, 1.35);
+  float radius = waveT * 2.2;
+  float feather = 0.55;
+
+  // Wave masks
+  float innerMask = smoothstep(radius, max(0.001, radius - feather), dist);
+  float crestMask = smoothstep(radius + 0.16, radius, dist) * (1.0 - smoothstep(radius, radius - 0.26, dist));
+
+  // Chromatic color grading along the optical bloom:
+  // Core is white -> Mid is soft lavender -> Crest is electric periwinkle
+  vec3 col = mix(uColorLavender, uColorCore, clamp(innerMask * 1.5, 0.0, 1.0));
+  col = mix(col, uColorPeriwinkle, clamp(crestMask * 0.85 + ripple, 0.0, 1.0));
+
+  // Luminous bloom intensity (subtle, filmic optical glow, never opaque solid paint)
+  float bloomAlpha = (innerMask * 0.42 + crestMask * 0.65 + ripple) * pow(uRevealProgress, 1.2);
+  bloomAlpha = clamp(bloomAlpha, 0.0, 0.62);
+
+  gl_FragColor = vec4(col * bloomAlpha, bloomAlpha);
 }
 `;
 
@@ -217,8 +279,11 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
     // 3D Objects & Materials
     const materialRef = useRef<THREE.MeshStandardMaterial | null>(null);
     const strandMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+    const flangeMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
+    const edgeMaterialRef = useRef<THREE.MeshStandardMaterial | null>(null);
     const sweepMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
-    const haloMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
+    const diffusionMatRef = useRef<THREE.ShaderMaterial | null>(null);
+    const takeoverMatRef = useRef<THREE.ShaderMaterial | null>(null);
     const windingMaterialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
     const spoolGroupRef = useRef<THREE.Group | null>(null);
     const entranceGroupRef = useRef<THREE.Group | null>(null);
@@ -387,12 +452,14 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         transparent: true,
         opacity: 0.90,
       });
+      flangeMaterialRef.current = flangeMaterial;
 
       const edgeMaterial = new THREE.MeshStandardMaterial({
         color: 0x0c0f24,
         roughness: 0.35,
         metalness: 0.22,
       });
+      edgeMaterialRef.current = edgeMaterial;
 
       const hubMaterial = new THREE.MeshStandardMaterial({
         color: 0x080a16,
@@ -433,7 +500,8 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       });
       materialRef.current = filamentMaterial;
 
-      // --- GLOW SHADER MATERIALS ---
+      // --- 3-LAYER COORDINATED SHADER MATERIALS ---
+      // LAYER 1: Circumference & Rim Sweep Shader
       const sweepMaterial = new THREE.ShaderMaterial({
         vertexShader: SWEEP_VERTEX_SHADER,
         fragmentShader: SWEEP_FRAGMENT_SHADER,
@@ -441,7 +509,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           uProgress: { value: 0.0 },
           uSweepAngle: { value: 0.0 },
           uTailLength: { value: 0.38 },
-          uColorCore: { value: new THREE.Color('#F0EFFF') },
+          uColorCore: { value: new THREE.Color('#FFFFFF') },
           uColorPeriwinkle: { value: new THREE.Color('#6258F5') },
           uColorLavender: { value: new THREE.Color('#C7C2FA') },
           uBaseGlow: { value: 0.0 },
@@ -455,19 +523,47 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       });
       sweepMaterialRef.current = sweepMaterial;
 
-      const haloMaterial = new THREE.ShaderMaterial({
-        vertexShader: HALO_VERTEX_SHADER,
-        fragmentShader: HALO_FRAGMENT_SHADER,
+      // LAYER 2: 3D Volumetric Atmospheric Diffusion Material
+      const diffusionMat = new THREE.ShaderMaterial({
+        vertexShader: DIFFUSION_VERTEX_SHADER,
+        fragmentShader: DIFFUSION_FRAGMENT_SHADER,
         uniforms: {
-          uColor: { value: new THREE.Color('#6258F5') },
-          uOpacity: { value: 0.0 },
+          uDiffusionStrength: { value: 0.0 },
+          uColorCore: { value: new THREE.Color('#FFFFFF') },
+          uColorLavender: { value: new THREE.Color('#C7C2FA') },
+          uColorPeriwinkle: { value: new THREE.Color('#6258F5') },
         },
         transparent: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         side: THREE.DoubleSide,
       });
-      haloMaterialRef.current = haloMaterial;
+      diffusionMatRef.current = diffusionMat;
+
+      // LAYER 3: Optical Bloom & Radial Caustic Aperture (Additive Photonic Bloom)
+      const takeoverMat = new THREE.ShaderMaterial({
+        vertexShader: TAKEOVER_VERTEX_SHADER,
+        fragmentShader: TAKEOVER_FRAGMENT_SHADER,
+        uniforms: {
+          uRevealProgress: { value: 0.0 },
+          uCenter: { value: new THREE.Vector2(0.5, 0.5) },
+          uAspect: { value: 1.0 },
+          uColorCore: { value: new THREE.Color('#FFFFFF') },
+          uColorLavender: { value: new THREE.Color('#E8E5FF') },
+          uColorPeriwinkle: { value: new THREE.Color('#6258F5') },
+        },
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthTest: false,
+        depthWrite: false,
+      });
+      takeoverMatRef.current = takeoverMat;
+
+      // Full-screen NDC Quad rendered on top of the scene
+      const takeoverGeo = new THREE.PlaneGeometry(2, 2);
+      const takeoverMesh = new THREE.Mesh(takeoverGeo, takeoverMat);
+      takeoverMesh.frustumCulled = false;
+      scene.add(takeoverMesh);
 
       // Two Circular Side Flanges (Optimized polygon counts)
       for (const side of [-1, 1]) {
@@ -480,7 +576,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         const outerRimMesh = new THREE.Mesh(outerRimGeo, edgeMaterial);
         flangeGroup.add(outerRimMesh);
 
-        // Circumference Energy Sweep Torus Ring (Follows exact circular 3D model edge)
+        // Circumference Energy Sweep Torus Ring (Layer 1 highlight)
         const sweepRingGeo = new THREE.TorusGeometry(outerRadius - 0.026, 0.046, 16, 96);
         const sweepRingMesh = new THREE.Mesh(sweepRingGeo, sweepMaterial);
         sweepRingMesh.position.z = side * 0.008;
@@ -496,7 +592,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         const innerRimMesh = new THREE.Mesh(innerRimGeo, edgeMaterial);
         flangeGroup.add(innerRimMesh);
 
-        // 6 Radial Cutout Windows
+        // 6 Radial Cutout Windows with Beveled Spoke Highlights
         for (let i = 0; i < 6; i++) {
           const angle = (i * Math.PI) / 3;
           const slotGeo = new THREE.BoxGeometry(0.38, 0.78, 0.08);
@@ -509,6 +605,17 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           );
           slot.rotation.z = angle + Math.PI / 2;
           flangeGroup.add(slot);
+
+          // Subtle spoke rib highlight mesh
+          const spokeRimGeo = new THREE.BoxGeometry(0.04, 0.76, 0.09);
+          const spokeRim = new THREE.Mesh(spokeRimGeo, edgeMaterial);
+          spokeRim.position.set(
+            Math.cos(angle) * 1.52,
+            Math.sin(angle) * 1.52,
+            0.01
+          );
+          spokeRim.rotation.z = angle + Math.PI / 2;
+          flangeGroup.add(spokeRim);
         }
 
         spoolGroup.add(flangeGroup);
@@ -520,17 +627,17 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       hubMesh.rotation.x = Math.PI / 2;
       spoolGroup.add(hubMesh);
 
-      // Arbor Tube
+      // Arbor Tube (Dark contrast center hole)
       const arborGeo = new THREE.CylinderGeometry(arborRadius, arborRadius, spoolWidth + 0.30, 24);
       const arborMesh = new THREE.Mesh(arborGeo, edgeMaterial);
       arborMesh.rotation.x = Math.PI / 2;
       spoolGroup.add(arborMesh);
 
-      // Volumetric Atmospheric Halo Aura Disk (Attached behind spool for Phase D)
-      const haloGeo = new THREE.RingGeometry(outerRadius * 0.88, outerRadius * 1.52, 64);
-      const haloMesh = new THREE.Mesh(haloGeo, haloMaterial);
-      haloMesh.position.z = -0.08;
-      spoolGroup.add(haloMesh);
+      // LAYER 2: 3D Volumetric Atmospheric Diffusion Disk (Attached to spool)
+      const diffusionGeo = new THREE.RingGeometry(hubRadius * 0.90, outerRadius * 1.60, 64);
+      const diffusionMesh = new THREE.Mesh(diffusionGeo, diffusionMat);
+      diffusionMesh.position.z = -0.06;
+      spoolGroup.add(diffusionMesh);
 
       // Wound Filament Coil
       const woundRadius = 1.92;
@@ -540,17 +647,17 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
       coilMesh.rotation.x = Math.PI / 2;
       spoolGroup.add(coilMesh);
 
-      // Multi-Strand Winding Highlight Rings (Cascading illumination in Phase C)
+      // 8 Precision Concentric Winding Strand Highlight Rings (Layer 1 Winding tracks)
       const windingMats: THREE.MeshStandardMaterial[] = [];
-      const windingOffsets = [-0.38, -0.23, -0.08, 0.08, 0.23, 0.38];
+      const windingOffsets = [-0.42, -0.30, -0.18, -0.06, 0.06, 0.18, 0.30, 0.42];
       for (let i = 0; i < windingOffsets.length; i++) {
         const stepZ = coilWidth * windingOffsets[i];
-        const stepGeo = new THREE.TorusGeometry(woundRadius - 0.012, 0.026, 8, 40);
+        const stepGeo = new THREE.TorusGeometry(woundRadius - 0.010, 0.024, 8, 48);
         const wMat = new THREE.MeshStandardMaterial({
           color: new THREE.Color(color),
-          roughness: 0.25,
-          metalness: 0.14,
-          emissive: new THREE.Color(i % 2 === 0 ? '#6258F5' : '#9E94FF'),
+          roughness: 0.22,
+          metalness: 0.16,
+          emissive: new THREE.Color(i % 2 === 0 ? '#6258F5' : '#C7C2FA'),
           emissiveIntensity: 0.0,
         });
         windingMats.push(wMat);
@@ -730,84 +837,84 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           }
 
           // -----------------------------------------------------------------
-          // 5-PHASE CINEMATIC GLOW CHOREOGRAPHY (Phases A, B, C, D, E)
+          // 3-LAYER COORDINATED SHADER SYSTEM (GLSL)
           // -----------------------------------------------------------------
-          if (sweepMaterialRef.current) {
-            sweepMaterialRef.current.uniforms.uTime.value = time;
+          // Shader controls:
+          // uScrollProgress, uGlowProgress, uEdgeEmission, uWindingEmission, uDiffusionStrength, uRevealProgress
+
+          // State A -> B: 0.72 - 0.82 (Edge & circumference emission begins)
+          const edgeEmission = clamp((rawProgress - 0.72) / 0.10);
+          
+          // State B -> C: 0.80 - 0.90 (Winding tracks & spokes illuminate)
+          const windingEmission = clamp((rawProgress - 0.80) / 0.10);
+          
+          // Layer 2: 3D Atmospheric Diffusion expands: 0.84 - 0.96
+          const diffusionStrength = clamp((rawProgress - 0.84) / 0.11) * 1.35;
+          
+          // Layer 3: Full-Frame Spatial Light Takeover: 0.88 - 1.00
+          const revealProgress = clamp((rawProgress - 0.88) / 0.12);
+
+          // Update Layer 1 Geometry Materials:
+          if (edgeMaterialRef.current) {
+            edgeMaterialRef.current.emissive.set('#6258F5');
+            edgeMaterialRef.current.emissiveIntensity = edgeEmission * 1.5;
           }
-
-          // Phase A: Subtle Activation (0.72 - 0.82)
-          // A delicate periwinkle outline emerges along the outer flange perimeter
-          const baseRimGlow = clamp((rawProgress - 0.72) / 0.10) * 0.45;
-
-          // Phase B: Circumference Energy Sweep (0.80 - 0.92)
-          // Luminous highlight travels around the circular 3D model circumference
-          const sweepT = clamp((rawProgress - 0.80) / 0.12);
-          const easedSweepT = sweepT < 0.5 
-            ? 2 * sweepT * sweepT 
-            : 1 - Math.pow(-2 * sweepT + 2, 2) / 2;
-          const sweepAngle = (easedSweepT * 1.5) % 1.0;
-
-          // Sweep Intensity: Ramps smoothly and peaks during maximum zoom
-          let sweepIntensity = 0.0;
-          if (rawProgress >= 0.76 && rawProgress <= 0.98) {
-            const inT = clamp((rawProgress - 0.76) / 0.10);
-            const outT = clamp((0.98 - rawProgress) / 0.04);
-            sweepIntensity = inT * (0.65 + 0.35 * outT);
-          } else if (rawProgress > 0.98) {
-            // Phase E: Graceful resolution handing off into Section 2
-            sweepIntensity = lerp(0.65, 0.42, (rawProgress - 0.98) / 0.02);
+          if (flangeMaterialRef.current) {
+            flangeMaterialRef.current.emissive.set('#3B32B3');
+            flangeMaterialRef.current.emissiveIntensity = edgeEmission * 0.75;
           }
-
-          if (sweepMaterialRef.current) {
-            sweepMaterialRef.current.uniforms.uProgress.value = clamp((rawProgress - 0.72) / 0.28);
-            sweepMaterialRef.current.uniforms.uBaseGlow.value = baseRimGlow;
-            sweepMaterialRef.current.uniforms.uSweepAngle.value = sweepAngle;
-            sweepMaterialRef.current.uniforms.uIntensity.value = sweepIntensity;
-          }
-
-          // Phase C: Filament Winding Illumination (0.84 - 0.96)
-          // Progressive highlight traveling across visible winding, revealing strands & depth
-          const windingT = clamp((rawProgress - 0.84) / 0.10);
           if (materialRef.current) {
-            const baseFilamentColor = materialRef.current.color;
-            const emissiveColor = new THREE.Color('#6258F5').lerp(baseFilamentColor, 0.38);
-            materialRef.current.emissive = emissiveColor;
-            materialRef.current.emissiveIntensity = windingT * 0.48;
+            const baseColor = materialRef.current.color;
+            materialRef.current.emissive.set('#6258F5').lerp(baseColor, 0.40);
+            materialRef.current.emissiveIntensity = windingEmission * 0.95;
+          }
+          if (strandMaterialRef.current) {
+            strandMaterialRef.current.emissive.set('#8B80F9');
+            strandMaterialRef.current.emissiveIntensity = windingEmission * 1.35;
           }
 
-          // Cascading illumination across discrete winding strand rings
+          // Layer 1 Concentric Winding Rings Cascading Glow
           const wMats = windingMaterialsRef.current;
           for (let i = 0; i < wMats.length; i++) {
-            const ringDelay = 0.84 + (i / Math.max(1, wMats.length)) * 0.06;
-            const ringT = clamp((rawProgress - ringDelay) / 0.06);
-            const ringPulse = ringT * (0.75 + 0.25 * Math.sin(time * 3.5 + i * 1.4));
-            wMats[i].emissiveIntensity = ringPulse * 1.35;
+            const delay = 0.80 + (i / Math.max(1, wMats.length)) * 0.08;
+            const ringT = clamp((rawProgress - delay) / 0.08);
+            const pulse = ringT * (0.85 + 0.35 * Math.sin(time * 3.5 + i * 1.2));
+            wMats[i].emissiveIntensity = pulse * 1.9;
           }
 
-          // Leading uncoiling strand illumination
-          if (strandMaterialRef.current) {
-            strandMaterialRef.current.emissive = new THREE.Color('#7B72F8');
-            strandMaterialRef.current.emissiveIntensity = windingT * 0.65;
+          // Layer 1 Outer Circumference Sweep
+          if (sweepMaterialRef.current) {
+            sweepMaterialRef.current.uniforms.uTime.value = time;
+            sweepMaterialRef.current.uniforms.uProgress.value = clamp((rawProgress - 0.72) / 0.28);
+            sweepMaterialRef.current.uniforms.uBaseGlow.value = edgeEmission * 0.55;
+            const sweepT = clamp((rawProgress - 0.76) / 0.14);
+            sweepMaterialRef.current.uniforms.uSweepAngle.value = (sweepT * 2.0) % 1.0;
+            sweepMaterialRef.current.uniforms.uIntensity.value = edgeEmission * 1.25;
           }
 
-          // Phase D: Peak Luminosity & Luminous Halo Aura (0.88 - 0.98)
-          let haloOpacity = 0.0;
-          if (rawProgress >= 0.88) {
-            if (rawProgress <= 0.96) {
-              haloOpacity = clamp((rawProgress - 0.88) / 0.08) * 0.62;
-            } else {
-              // Phase E: Softens gently into Section 2
-              haloOpacity = lerp(0.62, 0.42, (rawProgress - 0.96) / 0.04);
-            }
+          // Layer 2: 3D Volumetric Atmospheric Diffusion
+          if (diffusionMatRef.current) {
+            diffusionMatRef.current.uniforms.uDiffusionStrength.value = diffusionStrength;
           }
-          if (haloMaterialRef.current) {
-            haloMaterialRef.current.uniforms.uOpacity.value = haloOpacity;
+
+          // Layer 3: Full-Frame Spatial Light Takeover (Expanding Luminous Aperture)
+          if (takeoverMatRef.current && cameraRef.current && containerRef.current) {
+            // Project 3D spool center onto screen UV [0, 1]
+            const spoolWorldPos = new THREE.Vector3();
+            spoolGroupRef.current.getWorldPosition(spoolWorldPos);
+            spoolWorldPos.project(cameraRef.current);
+
+            const screenX = (spoolWorldPos.x + 1.0) * 0.5;
+            const screenY = (spoolWorldPos.y + 1.0) * 0.5;
+
+            takeoverMatRef.current.uniforms.uCenter.value.set(screenX, screenY);
+            takeoverMatRef.current.uniforms.uAspect.value = containerRef.current.clientWidth / Math.max(1, containerRef.current.clientHeight);
+            takeoverMatRef.current.uniforms.uRevealProgress.value = revealProgress;
           }
 
           // Dynamic Studio Rim Light Spill into the surrounding scene
           if (rimLightRef.current) {
-            const lightBoost = clamp((rawProgress - 0.84) / 0.12) * 1.25;
+            const lightBoost = clamp((rawProgress - 0.80) / 0.15) * 2.2;
             rimLightRef.current.intensity = 3.8 + lightBoost;
           }
         } else {
@@ -816,11 +923,20 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
             sweepMaterialRef.current.uniforms.uProgress.value = 0.0;
             sweepMaterialRef.current.uniforms.uBaseGlow.value = 0.0;
           }
-          if (haloMaterialRef.current) {
-            haloMaterialRef.current.uniforms.uOpacity.value = 0.0;
+          if (diffusionMatRef.current) {
+            diffusionMatRef.current.uniforms.uDiffusionStrength.value = 0.0;
+          }
+          if (takeoverMatRef.current) {
+            takeoverMatRef.current.uniforms.uRevealProgress.value = 0.0;
           }
           if (materialRef.current) {
             materialRef.current.emissiveIntensity = 0.0;
+          }
+          if (edgeMaterialRef.current) {
+            edgeMaterialRef.current.emissiveIntensity = 0.0;
+          }
+          if (flangeMaterialRef.current) {
+            flangeMaterialRef.current.emissiveIntensity = 0.0;
           }
           const finalRotX = p.rotationX + floatRotX + cursorTiltX + pointerDragRef.current.tilt;
           const finalRotY = p.rotationY + floatRotY + cursorTiltY + pointerDragRef.current.spin;
@@ -932,8 +1048,11 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         renderer.domElement.remove();
         materialRef.current = null;
         strandMaterialRef.current = null;
+        flangeMaterialRef.current = null;
+        edgeMaterialRef.current = null;
         sweepMaterialRef.current = null;
-        haloMaterialRef.current = null;
+        diffusionMatRef.current = null;
+        takeoverMatRef.current = null;
         windingMaterialsRef.current = [];
         spoolGroupRef.current = null;
         entranceGroupRef.current = null;
