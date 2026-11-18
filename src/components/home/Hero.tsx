@@ -196,20 +196,6 @@ export function Hero() {
                 ref={introRef} 
                 className="w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
               >
-                {/* Product Badge Pill */}
-                <div 
-                  className="mb-3.5 sm:mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] backdrop-blur-md transition-colors duration-300 shadow-sm"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                    borderColor: 'rgba(255, 255, 255, 0.25)',
-                    borderWidth: '1px',
-                    color: currentTheme.accentLight,
-                  }}
-                >
-                  <Sparkles className="h-3.5 w-3.5" style={{ color: currentTheme.accentLight }} />
-                  <span>{currentTheme.badge}</span>
-                </div>
-
                 {/* Dialed Coffee Style Massive Editorial Headline */}
                 <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-[5.2rem] font-extrabold uppercase leading-[0.92] tracking-tightest text-white drop-shadow-sm">
                   {currentTheme.headlineFirst} <br />
