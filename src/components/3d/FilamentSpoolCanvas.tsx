@@ -54,29 +54,26 @@ interface SpoolCanvasProps {
 // Snappy, Fluid 3D Timeline Keyframes (Reference 3D4Makers Choreography)
 const CINEMATIC_TIMELINE_KEYFRAMES = [
   // 0% - 15%: Opening hero composition — beautifully balanced on right side, zero clipping
-  { progress: 0.00, rotX: 0.16,  rotY: -0.42, rotZ: 0.05, posX: 0.90, posY: -0.05, posZ: 0.00, scale: 0.88, fov: 38.0, orbitAngle: 0.00, dollyZ: 0.00 },
-  { progress: 0.15, rotX: -0.06, rotY: 0.18,  rotZ: 0.30, posX: 0.80, posY: -0.08, posZ: 0.15, scale: 0.92, fov: 38.0, orbitAngle: 0.06, dollyZ: 0.08 },
+  { progress: 0.00, rotX: 0.16,  rotY: -0.42, rotZ: 0.05, posX: 0.76, posY: -0.04, posZ: 0.00, scale: 0.74, fov: 38.0, orbitAngle: 0.00, dollyZ: 0.00 },
+  { progress: 0.15, rotX: -0.06, rotY: 0.18,  rotZ: 0.30, posX: 0.68, posY: -0.06, posZ: 0.15, scale: 0.78, fov: 38.0, orbitAngle: 0.06, dollyZ: 0.08 },
   
   // 15% - 35%: First 3D rotation revealing transparent flange & core
-  { progress: 0.35, rotX: -0.20, rotY: 0.65,  rotZ: 0.90, posX: 0.50, posY: -0.08, posZ: 0.40, scale: 1.02, fov: 37.8, orbitAngle: 0.16, dollyZ: 0.20 },
+  { progress: 0.35, rotX: -0.20, rotY: 0.65,  rotZ: 0.90, posX: 0.44, posY: -0.06, posZ: 0.35, scale: 0.88, fov: 37.8, orbitAngle: 0.16, dollyZ: 0.16 },
 
   // 35% - 60%: Three-quarter product reveal (wound core & cutout windows)
-  { progress: 0.60, rotX: 0.25,  rotY: 1.25,  rotZ: 1.60, posX: 0.15, posY: 0.02,  posZ: 0.65, scale: 1.15, fov: 37.5, orbitAngle: 0.28, dollyZ: 0.32 },
+  { progress: 0.60, rotX: 0.25,  rotY: 1.25,  rotZ: 1.60, posX: 0.14, posY: 0.04,  posZ: 0.50, scale: 0.98, fov: 37.5, orbitAngle: 0.28, dollyZ: 0.22 },
 
-  // 60% - 72%: Controlled final approach (re-centering and rotating toward front-on alignment)
-  { progress: 0.72, rotX: 0.08,  rotY: 2.70,  rotZ: 2.85, posX: 0.00, posY: 0.00,  posZ: 0.75, scale: 1.25, fov: 37.2, orbitAngle: 0.10, dollyZ: 0.38 },
+  // 60% - 75%: Controlled final approach (re-centering and rotating toward front-on alignment)
+  { progress: 0.75, rotX: 0.08,  rotY: 2.70,  rotZ: 2.85, posX: 0.00, posY: 0.10, posZ: 0.30, scale: 1.05, fov: 37.5, orbitAngle: 0.08, dollyZ: 0.10 },
 
-  // 72% - 82%: State A -> State B (Detailed reel, dark mechanical center, circumference emission awakens)
-  { progress: 0.82, rotX: 0.04,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 0.88, scale: 1.34, fov: 37.0, orbitAngle: 0.00, dollyZ: 0.46 },
+  // 75% - 85%: State A -> State B (Detailed reel, dark mechanical center, circumference emission awakens)
+  { progress: 0.85, rotX: 0.04,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.14, posZ: 0.36, scale: 1.12, fov: 37.2, orbitAngle: 0.00, dollyZ: 0.12 },
 
-  // 82% - 90%: State B -> State C (Winding illumination & 3D diffusion expand, camera dollies forward)
-  { progress: 0.90, rotX: 0.02,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.25, scale: 1.50, fov: 36.8, orbitAngle: 0.00, dollyZ: 0.68 },
+  // 85% - 94%: State B -> State C (Winding illumination & 3D rim glow expand, perfect editorial framing)
+  { progress: 0.94, rotX: 0.02,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.16, posZ: 0.42, scale: 1.18, fov: 37.0, orbitAngle: 0.00, dollyZ: 0.15 },
 
-  // 90% - 96%: State C -> State D (Broad luminous close-up, concentric windings fill composition, light spreads)
-  { progress: 0.96, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 1.70, scale: 1.75, fov: 36.5, orbitAngle: 0.00, dollyZ: 0.95 },
-
-  // 96% - 100%: State D -> State E (Radial light takeover expands to full frame, revealing next section)
-  { progress: 1.00, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.00, posZ: 2.05, scale: 2.05, fov: 36.0, orbitAngle: 0.00, dollyZ: 1.20 },
+  // 94% - 100%: State C -> State D (Grand Climax: Razor-sharp product portrait with luminous rim light)
+  { progress: 1.00, rotX: 0.00,  rotY: 3.14159, rotZ: 3.14159, posX: 0.00, posY: 0.18, posZ: 0.45, scale: 1.22, fov: 36.8, orbitAngle: 0.00, dollyZ: 0.18 },
 ];
 
 // ---------------------------------------------------------------------------
@@ -89,8 +86,8 @@ const JOURNEY_WAYPOINTS = [
   new THREE.Vector3(0.20, -0.06, 0.06),  // 0.50: Engineering Metrology & Quality (Center-Right)
   new THREE.Vector3(-0.45, 0.00, 0.04),  // 0.65: Materials Showcase (Center-Left)
   new THREE.Vector3(-0.95, -0.08, 0.02), // 0.80: Products Catalog (Left Gutter)
-  new THREE.Vector3(-1.18, -0.35, 0.00), // 0.88: Section 6 (Descending into Lower Left)
-  new THREE.Vector3(-1.65, -0.80, -0.15), // 0.95: Approaching Footer (Sweeping toward Extreme Lower Left)
+  new THREE.Vector3(-1.18, -0.32, 0.00), // 0.88: Section 6 (Descending into Lower Left)
+  new THREE.Vector3(-1.32, -0.60, 0.00), // 0.94: Footer Docking (Sitting clearly in Footer Left, visible!)
   new THREE.Vector3(-2.15, -1.30, -0.40), // 1.00: Extreme Bottom Left Corner Horizon & Disappear
 ];
 
@@ -104,7 +101,7 @@ const JOURNEY_ROT_KEYS = [
   { t: 0.65, rotX: -0.10, rotY: Math.PI * 2.20, rotZ: 0.18 },
   { t: 0.80, rotX: 0.12,  rotY: Math.PI * 2.60, rotZ: 0.08 },
   { t: 0.88, rotX: 0.18,  rotY: Math.PI * 3.10, rotZ: 0.04 },
-  { t: 0.95, rotX: 0.24,  rotY: Math.PI * 3.65, rotZ: 0.10 },
+  { t: 0.94, rotX: 0.22,  rotY: Math.PI * 3.55, rotZ: 0.08 },
   { t: 1.00, rotX: 0.30,  rotY: Math.PI * 4.20, rotZ: 0.18 },
 ];
 
@@ -115,9 +112,9 @@ const JOURNEY_SCALE_KEYS = [
   { t: 0.50, scale: 0.44 },
   { t: 0.65, scale: 0.42 },
   { t: 0.80, scale: 0.38 },
-  { t: 0.88, scale: 0.32 },
-  { t: 0.95, scale: 0.16 },
-  { t: 1.00, scale: 0.00 }, // Complete scale vanishing at extreme bottom left
+  { t: 0.88, scale: 0.34 },
+  { t: 0.94, scale: 0.32 }, // Remains beautifully visible in the footer!
+  { t: 1.00, scale: 0.00 }, // Only disappears at the very end
 ];
 
 const interpolateJourneyRot = (t: number) => {
@@ -919,14 +916,14 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
               if (isPhone) {
                 posX = floatX + cursorShiftX;
-                posY = lerp(0.0, -0.25, easeShrink) + floatY + cursorShiftY;
-                posZ = lerp(1.1, 0.0, easeShrink);
-                sc = lerp(heroClimax.scale * 0.58, s0 * 0.45, easeShrink);
+                posY = lerp(0.16, -0.20, easeShrink) + floatY + cursorShiftY;
+                posZ = lerp(0.45, 0.0, easeShrink);
+                sc = lerp(0.52, s0 * 0.45, easeShrink);
               } else if (isTablet) {
                 posX = floatX + cursorShiftX;
-                posY = lerp(0.0, -0.10, easeShrink) + floatY + cursorShiftY;
-                posZ = lerp(1.25, 0.0, easeShrink);
-                sc = lerp(heroClimax.scale * 0.70, s0 * 0.60, easeShrink);
+                posY = lerp(0.14, -0.10, easeShrink) + floatY + cursorShiftY;
+                posZ = lerp(0.60, 0.0, easeShrink);
+                sc = lerp(0.68, s0 * 0.60, easeShrink);
               }
 
               spoolGroupRef.current.position.set(posX, posY, posZ);
@@ -1035,9 +1032,10 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
               });
 
               // =============================================================
-              // EXTREME BOTTOM RIGHT CORNER DISAPPEARANCE (jt: 0.86 -> 1.00)
+              // EXTREME BOTTOM LEFT CORNER DISAPPEARANCE (jt: 0.94 -> 1.00)
+              // The spool stays fully visible & rotating in the footer up to jt=0.94!
               // =============================================================
-              const exitT = clamp((jt - 0.86) / 0.14, 0, 1);
+              const exitT = clamp((jt - 0.94) / 0.06, 0, 1);
               const easeExit = 0.5 - 0.5 * Math.cos(exitT * Math.PI);
               const exitAlpha = 1.0 - easeExit;
 
@@ -1121,20 +1119,24 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           const isTablet = containerW >= 640 && containerW < 1024;
 
           if (isPhone) {
+            // Mobile: Centered in the dedicated hero stage window above controls, zero text overlap
             posX = floatX + cursorShiftX;
-            posY = lerp(-0.52, 0.00, paced) + floatY + cursorShiftY;
-            posZ = lerp(0, 1.1, paced);
-            sc = lerp(sc * 0.35, sc * 0.58, paced);
+            posY = lerp(0.06, 0.16, paced) + floatY + cursorShiftY;
+            posZ = lerp(0, 0.45, paced);
+            sc = lerp(0.24, 0.52, paced);
           } else if (isTablet) {
+            // Tablet: Centered with comfortable scale
             posX = floatX + cursorShiftX;
-            posY = lerp(-0.25, 0.00, paced) + floatY + cursorShiftY;
-            posZ = lerp(0, 1.25, paced);
-            sc = lerp(sc * 0.50, sc * 0.70, paced);
+            posY = lerp(0.04, 0.14, paced) + floatY + cursorShiftY;
+            posZ = lerp(0, 0.60, paced);
+            sc = lerp(0.38, 0.68, paced);
           } else {
-            // Adaptive positioning for laptops: check aspect ratio & viewport width
-            if (containerW < 1440 || aspect < 1.85) {
-              posX = posX * 0.88 - 0.12;
-              sc = sc * 0.92;
+            // Desktop: Adaptive positioning for laptops & ultra-wides, generous right margin
+            if (containerW < 1366 || aspect < 1.70) {
+              posX = posX * 0.84 - 0.08;
+              sc = sc * 0.88;
+            } else if (containerW > 1800 && aspect > 2.0) {
+              posX = Math.min(posX * 1.15, 1.35);
             }
           }
 
@@ -1143,7 +1145,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           spoolGroupRef.current.scale.setScalar(sc);
 
           if (cameraRef.current) {
-            const baseCamZ = isPhone ? 9.2 : isTablet ? 8.8 : aspect < 1.65 ? 8.5 : 8.1;
+            const baseCamZ = isPhone ? 8.8 : isTablet ? 8.4 : aspect < 1.65 ? 8.3 : 8.1;
             cameraRef.current.position.z = baseCamZ - dollyZ;
           }
 
@@ -1220,7 +1222,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
             takeoverMatRef.current.uniforms.uCenter.value.set(screenX, screenY);
             takeoverMatRef.current.uniforms.uAspect.value = containerRef.current.clientWidth / Math.max(1, containerRef.current.clientHeight);
-            takeoverMatRef.current.uniforms.uRevealProgress.value = revealProgress;
+            takeoverMatRef.current.uniforms.uRevealProgress.value = revealProgress * 0.12;
           }
 
           // Dynamic Studio Rim Light Spill into the surrounding scene
@@ -1291,7 +1293,7 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         renderer.setSize(width, height, false);
         const aspect = width / height;
         camera.aspect = aspect;
-        camera.position.z = width < 640 ? 8.6 : aspect < 1.65 ? 8.5 : 8.1;
+        camera.position.z = width < 640 ? 8.8 : width < 1024 ? 8.4 : aspect < 1.65 ? 8.3 : 8.1;
         camera.updateProjectionMatrix();
       };
 

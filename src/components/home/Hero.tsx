@@ -153,7 +153,7 @@ export function Hero() {
       {/* Sticky Full-Viewport Stage */}
       <div 
         ref={viewportRef}
-        className="sticky top-0 h-svh min-h-[580px] w-full overflow-hidden flex flex-col justify-center transition-colors duration-500 ease-in-out"
+        className="sticky top-0 h-svh min-h-[600px] w-full overflow-hidden flex flex-col justify-center pt-16 sm:pt-20 lg:pt-14 pb-4 transition-colors duration-500 ease-in-out"
         style={{
           background: currentTheme.bgGradient,
         }}
@@ -178,7 +178,7 @@ export function Hero() {
         />
 
         {/* Foreground Editorial Layer */}
-        <div className="relative z-30 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-14 sm:pt-20 lg:pt-16 pb-4 pointer-events-none">
+        <div className="relative z-30 mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12 pt-2 sm:pt-4 pb-2 sm:pb-4 pointer-events-none">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[55vh] lg:min-h-[60vh]">
             
             {/* Left Column Content Area */}
@@ -189,8 +189,8 @@ export function Hero() {
                 ref={introRef} 
                 className="w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
               >
-                {/* Precision Industrial Headline */}
-                <h1 className="text-2xl sm:text-5xl lg:text-6xl xl:text-[4.1rem] font-extrabold uppercase leading-[0.98] tracking-tightest text-[#111111]">
+                {/* Precision Industrial Headline with generous line-height to guarantee zero ascender clipping */}
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.0rem] font-extrabold uppercase leading-[1.08] sm:leading-[1.04] tracking-tight sm:tracking-tightest text-[#111111] pt-1 pb-1">
                   {currentTheme.headlineFirst} <br />
                   <span 
                     className="transition-colors duration-300 text-[#5401C5]"
@@ -206,8 +206,11 @@ export function Hero() {
                   {currentTheme.description}
                 </p>
 
+                {/* Dedicated Mobile Spool Window (< lg only): gives the 3D spool its own clear stage */}
+                <div className="lg:hidden w-full h-[180px] sm:h-[220px] pointer-events-none my-1" aria-hidden="true" />
+
                 {/* Interactive Masterbatch Color Switcher */}
-                <div className="mt-3 sm:mt-4 max-w-xl">
+                <div className="mt-2.5 sm:mt-4 max-w-xl">
                   <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                     <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] text-[#696969]">
                       Select Masterbatch Color:
@@ -383,10 +386,10 @@ export function Hero() {
         {/* ACT 3: Grand Climax — The Optical Aperture & Metrology Climax (Active 84% - 100%) */}
         <div
           ref={climaxRef}
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center opacity-0 will-change-[opacity,transform] z-20 px-5 sm:px-8 max-w-5xl mx-auto"
+          className="pointer-events-none absolute inset-0 flex flex-col justify-between items-center text-center opacity-0 will-change-[opacity,transform] z-30 px-5 sm:px-8 max-w-5xl mx-auto pt-20 sm:pt-24 pb-8 sm:pb-12"
         >
-          {/* Status Pill */}
-          <div className="mb-4 sm:mb-6 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.22em] text-[#111111] border border-[#E5E5E5] bg-white/95 backdrop-blur-xl shadow-md">
+          {/* Top: Status Pill */}
+          <div className="inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.22em] text-[#111111] border border-[#E5E5E5] bg-white/95 backdrop-blur-xl shadow-md">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5401C5] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#5401C5]"></span>
@@ -394,44 +397,47 @@ export function Hero() {
             <span>Aperture Metrology • 100% Monofilament Purity</span>
           </div>
 
-          {/* Massive Editorial Headline */}
-          <h2 className="max-w-4xl text-3xl sm:text-5xl lg:text-7xl font-extrabold uppercase leading-[0.92] tracking-tightest text-[#111111]">
-            Perfection In <br />
-            <span className="text-[#5401C5]">
-              Every Single Layer.
-            </span>
-          </h2>
+          {/* Middle: Open visual space for the 3D Spool */}
+          <div className="flex-1 w-full min-h-[140px] sm:min-h-[200px]" aria-hidden="true" />
 
-          {/* Editorial Subtitle */}
-          <p className="mt-4 sm:mt-5 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] font-medium">
-            Side-by-side computer-wound pitch eliminates tangles at high speeds. Calibrated 4.2N tension ensures smooth, continuous extrusion through every print hour.
-          </p>
+          {/* Bottom Editorial Content */}
+          <div className="w-full flex flex-col items-center">
+            {/* Massive Editorial Headline */}
+            <h2 className="max-w-4xl text-2xl sm:text-4xl lg:text-5xl font-extrabold uppercase leading-[1.04] tracking-tightest text-[#111111]">
+              Perfection In <span className="text-[#5401C5]">Every Single Layer.</span>
+            </h2>
 
-          {/* Three Pure White Telemetry Cards */}
-          <div className="mt-6 sm:mt-8 grid grid-cols-3 gap-3 sm:gap-4 max-w-lg w-full">
-            <div className="p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
-              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Tolerance</span>
-              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#111111] block mt-0.5">±0.018 mm</strong>
-            </div>
-            <div className="p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
-              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Roundness</span>
-              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#5401C5] block mt-0.5">99.8%</strong>
-            </div>
-            <div className="p-3 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
-              <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Winding</span>
-              <strong className="font-mono text-base sm:text-xl font-extrabold text-[#111111] block mt-0.5">Snag-Free</strong>
-            </div>
-          </div>
+            {/* Editorial Subtitle */}
+            <p className="mt-2.5 sm:mt-3 max-w-xl text-xs sm:text-sm leading-relaxed text-[#696969] font-medium hidden sm:block">
+              Side-by-side computer-wound pitch eliminates tangles at high speeds. Calibrated 4.2N tension ensures smooth, continuous extrusion through every print hour.
+            </p>
 
-          {/* Smooth Scroll CTA Bridge to Section 2 */}
-          <div className="mt-6 sm:mt-8 pointer-events-auto">
-            <a
-              href="#color-studio"
-              className="group inline-flex items-center gap-2.5 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-[#111111] text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 hover:bg-[#252525] active:scale-95 shadow-md"
-            >
-              <span>Explore Masterbatch Science</span>
-              <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-1" />
-            </a>
+            {/* Three Pure White Telemetry Cards */}
+            <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2.5 sm:gap-4 max-w-lg w-full">
+              <div className="p-2.5 sm:p-3.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
+                <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Tolerance</span>
+                <strong className="font-mono text-sm sm:text-lg font-extrabold text-[#111111] block mt-0.5">±0.018 mm</strong>
+              </div>
+              <div className="p-2.5 sm:p-3.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
+                <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Roundness</span>
+                <strong className="font-mono text-sm sm:text-lg font-extrabold text-[#5401C5] block mt-0.5">99.8%</strong>
+              </div>
+              <div className="p-2.5 sm:p-3.5 rounded-2xl bg-white/95 backdrop-blur-xl border border-[#E5E5E5] shadow-sm">
+                <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-[#696969] block">Winding</span>
+                <strong className="font-mono text-sm sm:text-lg font-extrabold text-[#111111] block mt-0.5">Snag-Free</strong>
+              </div>
+            </div>
+
+            {/* Smooth Scroll CTA Bridge to Section 2 */}
+            <div className="mt-4 sm:mt-6 pointer-events-auto">
+              <a
+                href="#color-studio"
+                className="group inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-[#111111] text-white font-bold text-xs uppercase tracking-wider transition-all duration-200 hover:bg-[#252525] active:scale-95 shadow-md"
+              >
+                <span>Explore Masterbatch Science</span>
+                <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-1" />
+              </a>
+            </div>
           </div>
         </div>
 
