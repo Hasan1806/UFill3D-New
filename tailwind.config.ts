@@ -99,6 +99,7 @@ const config: Config = {
         "fade-in": "fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
         "pulse-subtle": "pulse-subtle 3s ease-in-out infinite",
         float: "float 6s ease-in-out infinite",
+        "spin-slow": "spin 35s linear infinite",
       },
     },
   },
