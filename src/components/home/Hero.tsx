@@ -153,7 +153,7 @@ export function Hero() {
       {/* Sticky Full-Viewport Stage */}
       <div 
         ref={viewportRef}
-        className="sticky top-0 h-svh min-h-[600px] w-full overflow-hidden flex flex-col justify-center pt-16 sm:pt-20 lg:pt-14 pb-4 transition-colors duration-500 ease-in-out"
+        className="sticky top-0 h-svh min-h-[600px] w-full overflow-hidden flex flex-col justify-start lg:justify-center pt-20 sm:pt-24 lg:pt-14 pb-4 transition-colors duration-500 ease-in-out"
         style={{
           background: currentTheme.bgGradient,
         }}
@@ -190,7 +190,7 @@ export function Hero() {
                 className="w-full will-change-[opacity,transform] pointer-events-auto transition-opacity duration-200"
               >
                 {/* Precision Industrial Headline with generous line-height to guarantee zero ascender clipping */}
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-[4.0rem] font-extrabold uppercase leading-[1.08] sm:leading-[1.04] tracking-tight sm:tracking-tightest text-[#111111] pt-1 pb-1">
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-[4.0rem] font-extrabold uppercase leading-[1.14] sm:leading-[1.05] tracking-tight sm:tracking-tightest text-[#111111] pt-1 pb-1">
                   {currentTheme.headlineFirst} <br />
                   <span 
                     className="transition-colors duration-300 text-[#5401C5]"
@@ -201,18 +201,18 @@ export function Hero() {
 
                 {/* Subtitle / Product Description */}
                 <p 
-                  className="mt-2.5 sm:mt-4 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] transition-colors duration-300"
+                  className="mt-2 sm:mt-3 max-w-xl text-xs sm:text-sm lg:text-base leading-relaxed text-[#696969] transition-colors duration-300"
                 >
                   {currentTheme.description}
                 </p>
 
                 {/* Secondary Mobile Subheading (Mobile Only: 2-3 lines of precision engineering copy) */}
-                <p className="mt-2 text-[11px] leading-relaxed text-[#696969] font-medium lg:hidden">
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[#696969] font-medium lg:hidden">
                   Continuous dual-axis optical inspection paired with tangle-free robotic winding. Calibrated for 600 mm/s high-speed CoreXY extrusion and zero nozzle clogs.
                 </p>
 
                 {/* Dedicated Mobile Spool Window (< lg only): gives the 3D spool its own clear stage */}
-                <div id="hero-mobile-spool-anchor" className="lg:hidden w-full h-[180px] sm:h-[220px] pointer-events-none my-1" aria-hidden="true" />
+                <div id="hero-mobile-spool-anchor" className="lg:hidden w-full h-[160px] sm:h-[200px] pointer-events-none my-1" aria-hidden="true" />
 
                 {/* Interactive Masterbatch Color Switcher */}
                 <div className="mt-2.5 sm:mt-4 max-w-xl">
