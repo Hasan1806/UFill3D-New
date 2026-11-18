@@ -916,14 +916,14 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
 
               if (isPhone) {
                 posX = floatX + cursorShiftX;
-                posY = lerp(0.16, -0.20, easeShrink) + floatY + cursorShiftY;
+                posY = lerp(0.20, -0.20, easeShrink) + floatY + cursorShiftY;
                 posZ = lerp(0.45, 0.0, easeShrink);
                 sc = lerp(0.52, s0 * 0.45, easeShrink);
               } else if (isTablet) {
                 posX = floatX + cursorShiftX;
-                posY = lerp(0.14, -0.10, easeShrink) + floatY + cursorShiftY;
+                posY = lerp(0.16, -0.10, easeShrink) + floatY + cursorShiftY;
                 posZ = lerp(0.60, 0.0, easeShrink);
-                sc = lerp(0.68, s0 * 0.60, easeShrink);
+                sc = lerp(0.65, s0 * 0.60, easeShrink);
               }
 
               spoolGroupRef.current.position.set(posX, posY, posZ);
@@ -1115,21 +1115,21 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
           const containerW = containerRef.current?.clientWidth || window.innerWidth;
           const containerH = containerRef.current?.clientHeight || window.innerHeight;
           const aspect = containerW / Math.max(1, containerH);
-          const isPhone = containerW < 640;
-          const isTablet = containerW >= 640 && containerW < 1024;
+          const isPhone = containerW < 640 || aspect < 0.75;
+          const isTablet = (containerW >= 640 && containerW < 1024) || (aspect >= 0.75 && aspect < 1.15);
 
           if (isPhone) {
-            // Mobile: Centered in the dedicated hero stage window above controls, zero text overlap
+            // Mobile: Perfectly centered in the blank stage window between text & swatches (zero text overlap)
             posX = floatX + cursorShiftX;
-            posY = lerp(0.06, 0.16, paced) + floatY + cursorShiftY;
+            posY = lerp(0.65, 0.20, paced) + floatY + cursorShiftY;
             posZ = lerp(0, 0.45, paced);
-            sc = lerp(0.24, 0.52, paced);
+            sc = lerp(0.28, 0.52, paced);
           } else if (isTablet) {
             // Tablet: Centered with comfortable scale
             posX = floatX + cursorShiftX;
-            posY = lerp(0.04, 0.14, paced) + floatY + cursorShiftY;
+            posY = lerp(0.40, 0.16, paced) + floatY + cursorShiftY;
             posZ = lerp(0, 0.60, paced);
-            sc = lerp(0.38, 0.68, paced);
+            sc = lerp(0.36, 0.65, paced);
           } else {
             // Desktop: Adaptive positioning for laptops & ultra-wides, generous right margin
             if (containerW < 1366 || aspect < 1.70) {
@@ -1293,7 +1293,9 @@ export const FilamentSpoolCanvas = forwardRef<SpoolCanvasHandle, SpoolCanvasProp
         renderer.setSize(width, height, false);
         const aspect = width / height;
         camera.aspect = aspect;
-        camera.position.z = width < 640 ? 8.8 : width < 1024 ? 8.4 : aspect < 1.65 ? 8.3 : 8.1;
+        const isPh = width < 640 || aspect < 0.75;
+        const isTab = (width >= 640 && width < 1024) || (aspect >= 0.75 && aspect < 1.15);
+        camera.position.z = isPh ? 8.8 : isTab ? 8.4 : aspect < 1.65 ? 8.3 : 8.1;
         camera.updateProjectionMatrix();
       };
 
