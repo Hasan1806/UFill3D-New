@@ -1,21 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 :root {
   /* Official Locked UFill3D Palette */
-  --ufill-primary: #111111;         /* Deep Charcoal Black */
-  --ufill-secondary: #5401C5;       /* Original Royal Violet brand accent */
-  --ufill-tertiary: #EEEAF5;        /* Subtle tinted mist surface */
-  --ufill-background: #FAFAFA;      /* Body Canvas Off-White */
-  --ufill-text: #252525;            /* Body Text Deep Slate */
-  --ufill-border: #E5E5E5;          /* Delicate Structural Rule */
-  --ufill-surface: #FFFFFF;         /* Pure White Surface */
-  --ufill-surface-soft: #F3F3F3;    /* Soft Surface Neutral */
-  --ufill-surface-dark: #181818;    /* Dark Surface Technical */
-  --ufill-muted: #696969;           /* Muted Text */
+  --ufill-primary: #111111;
+  /* Deep Charcoal Black */
+  --ufill-secondary: #5401C5;
+  /* Original Royal Violet brand accent */
+  --ufill-tertiary: #EEEAF5;
+  /* Subtle tinted mist surface */
+  --ufill-background: #FAFAFA;
+  /* Body Canvas Off-White */
+  --ufill-text: #252525;
+  /* Body Text Deep Slate */
+  --ufill-border: #E5E5E5;
+  /* Delicate Structural Rule */
+  --ufill-surface: #FFFFFF;
+  /* Pure White Surface */
+  --ufill-surface-soft: #F3F3F3;
+  /* Soft Surface Neutral */
+  --ufill-surface-dark: #181818;
+  /* Dark Surface Technical */
+  --ufill-muted: #696969e4;
+  /* Muted Text */
 }
 
 html {
@@ -34,7 +43,18 @@ body {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-h1, h2, h3, h4, h5, h6, p, span, a, button, input, label {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+a,
+button,
+input,
+label {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -61,6 +81,7 @@ h1, h2, h3, h4, h5, h6, p, span, a, button, input, label {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
